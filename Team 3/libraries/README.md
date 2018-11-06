@@ -1,4 +1,4 @@
-#README.md
+# README.md
 
 Apart from the SenseTarget library also remember to import the following:
 
