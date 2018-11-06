@@ -27,14 +27,11 @@
 #include <Pixy.h>
 #include <SPI.h>
 #include <SenseTarget.h>
-//#include <IRObject.h>
 #include <SharpIR.h>
 
 //========================================================================================
 // Create and initialize global variables, objects and constants (containers for all data)
 //========================================================================================
-//const int eStopPin = 12;          //create a name for pin connected to ESTOP switch
-//boolean ESTOP = true;             //create a name for Emergency stop of all motors
 boolean realTimeRunStop = true;   //create a name for real time control loop flag
 String command = "stop ";         //create a String object name for operator command string
 String loopError = "no error";    //create a String for the real time control loop error system
