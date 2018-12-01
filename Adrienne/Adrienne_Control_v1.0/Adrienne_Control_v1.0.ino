@@ -42,6 +42,12 @@ const long controlLoopInterval = 1000; //create a name for control loop cycle ti
 
 //Sonar variables
 
+const int sonar1 = 0;  //sets signal pin for first sonar sensor
+const int sonar2 = 1;  //sets signal pin for second sonar sensor
+const int sonar3 = 2;  //sets signal pin for third sonar sensor
+int triggerPin = 13;  //sets 1 trigger pin for all 3 sensors
+float distance1, distance2, distance3;  //initiates 3 distance variables
+
 //IR variables
 
 //Think variables
