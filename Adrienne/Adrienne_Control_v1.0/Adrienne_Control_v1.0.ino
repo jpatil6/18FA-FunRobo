@@ -1,3 +1,5 @@
+#include <SPI.h>
+
 /*****************************************************************************************
    Title: 2018 (ENGR3390 final project 1)
    Description: This structure template contains a SENSE-THINK-ACT flow to
@@ -24,7 +26,7 @@
 //========================================================================================
 #include <Servo.h>        //ServoMotors library
 #include <Pixy.h>         // Pixy Library
-#include <SPI.h>          // 
+#include <SPI.h>          //
 #include <SharpIR.h>      // IR sensors library
 #include <TugNeoPixel.h>  //NeoPixel Ring library
 
@@ -42,6 +44,9 @@ const long controlLoopInterval = 1000; //create a name for control loop cycle ti
 TugNeoPixel neo = TugNeoPixel(7, 16);  //initialize NeoPixel object
 
 //Pixy variables
+
+int targetArray[18];
+Pixy2 pixy;
 
 //Sonar variables
 
@@ -82,6 +87,8 @@ void setup() {      // Step 1)Put your robot setup code here, to run once:
   // Add mission code here
 
   //Pixy initializing
+
+   pixy.init();
 
   //Sonar initializing
 
@@ -234,6 +241,11 @@ String getOperatorInput() {
 
 
 // Pixy function
+
+void findTarget()
+{
+
+}
 
 // IR function
 void readIR() {
