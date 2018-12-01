@@ -1,3 +1,5 @@
+#include <SPI.h>
+
 /*****************************************************************************************
  * Title: 2018 (ENGR3390 final project 1)
  * Description: This structure template contains a SENSE-THINK-ACT flow to
@@ -23,7 +25,7 @@
 // Load supporting Arduino Libraries
 //========================================================================================
 #include <Servo.h>    //example of loading ServoMotors library
-#include <Pixy.h>
+#include <Pixy2.h>
 #include <SPI.h>
 #include <SharpIR.h>
 
@@ -39,6 +41,9 @@ unsigned long cycleTime = 0;      //create a name for elapsed loop cycle time
 const long controlLoopInterval = 1000; //create a name for control loop cycle time in milliseconds
 
 //Pixy variables
+
+int targetArray[18];
+Pixy2 pixy;
 
 //Sonar variables
 
@@ -71,6 +76,8 @@ void setup() {      // Step 1)Put your robot setup code here, to run once:
   // Add mission code here
   
   //Pixy initializing
+
+   pixy.init();
 
   //Sonar initializing
 
@@ -222,6 +229,11 @@ return command;
 // SENSE functions sense---sense---sense---sense---sense---sense---sense---sense---sense---
 
 // Pixy function
+
+void findTarget()
+{
+  
+}
 
 // IR function
 
