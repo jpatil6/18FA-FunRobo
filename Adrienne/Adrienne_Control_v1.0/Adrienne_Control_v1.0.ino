@@ -25,7 +25,7 @@
 // Load supporting Arduino Libraries
 //========================================================================================
 #include <Servo.h>        //ServoMotors library
-#include <Pixy.h>         // Pixy Library
+#include <Pixy2.h>         // Pixy Library
 #include <SPI.h>          //
 #include <SharpIR.h>      // IR sensors library
 #include <TugNeoPixel.h>  //NeoPixel Ring library
