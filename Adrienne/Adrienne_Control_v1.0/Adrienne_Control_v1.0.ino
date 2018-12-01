@@ -45,8 +45,8 @@ const long controlLoopInterval = 1000; //create a name for control loop cycle ti
 const int sonar1 = 0;  //sets signal pin for first sonar sensor
 const int sonar2 = 1;  //sets signal pin for second sonar sensor
 const int sonar3 = 2;  //sets signal pin for third sonar sensor
-int triggerPin = 13;  //sets 1 trigger pin for all 3 sensors
-float distance1, distance2, distance3;  //initiates 3 distance variables
+int trigger = 13;  //sets 1 trigger pin for all 3 sensors
+float sonarArray = {0,0,0};
 
 //IR variables
 
@@ -73,6 +73,8 @@ void setup() {      // Step 1)Put your robot setup code here, to run once:
   //Pixy initializing
 
   //Sonar initializing
+
+  pinMode(trigger, OUTPUT);  //sets trigger pin as output
 
   //IR initializing
 
@@ -224,6 +226,26 @@ return command;
 // IR function
 
 // Sonar function
+
+float mapSonar(float reading)
+{
+  return 0.0 + (reading - 0.0) * (18.0 - 0.0) / (19.0 - 0.0);
+}
+
+void readSonar(){
+  /*
+  Scale factor is (Vcc/512) per inch. A 5V supply yields ~9.8mV/in
+  Arduino analog pin goes from 0 to 1024, so the value has to be divided by 2 to get the actual inches
+  */
+  digitalWrite(trigger,HIGH);
+  delay(1); //triggers the sonars/makes them take a reading
+  digitalWrite(trigger,LOW);
+  
+  sonarArray[0] = mapSonar(analogRead(sonar1)/2.0);
+  sonarArray[1] = mapSonar(analogRead(sonar2)/2.0);
+  sonarArray[2] = mapSonar(analogRead(sonar3)/2.0);
+}
+
 
 // THINK functions think---think---think---think---think---think---think---think---think---
 
