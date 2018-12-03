@@ -45,7 +45,7 @@ TugNeoPixel neo = TugNeoPixel(7, 16);  //initialize NeoPixel object
 
 //Pixy variables
 
-int targetArray[18];
+int targetArray[17];
 Pixy2 pixy;
 
 //Sonar variables
@@ -244,8 +244,33 @@ String getOperatorInput() {
 
 void findTarget()
 {
-
+  targetArray = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  int targetPos; //b in the gaussian function
+  int targetWidth; //c in the gaussian functions, the std deviatiation
+  int targetSize; // a in the gaussian function
+  pixy.ccc.getBlocks();
+  for (int i = 0; i <= pixy.ccc.numBlocks; i++) //go through all the pixy blocks
+  {
+    if (pixy.ccc.blocks[i].m_signature = 1) //if it's narwhal colored...
+    {
+      if (pixy.ccc.blocks[i].m_width * pixy.ccc.blocks[i].m_height >= 100)//and it's big:
+      {
+        //this area threshold is arbitrary right now
+        targetPos = map(pixy.ccc.blocks[i].m_x, 0, 316, 0, 180); //we find where it is
+        targetWidth = map(pixy.ccc.blocks[i].m_width,1,316,1,3); // and how much of our field of view it takes
+        targetSize = map(pixy.ccc.blocks[i].m_height,1,208,50,100); // and how close it is, based on height
+        
+        for (int entry = 0; entry <= 17; i++) // then make a gaussian function with those values
+        {
+          targetArray[entry] = targetSize*exp((entry-targetPos)^2/(2*targetWidth^2));
+          // then we populate target array with the values of the gaussian function from 0 to 17
+        }
+        break;
+      }
+    }
+  }
 }
+
 
 // IR function
 void readIR() {
