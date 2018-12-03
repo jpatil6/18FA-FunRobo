@@ -144,6 +144,14 @@ void loop() {
 
       //SENSE-sense---sense---sense---sense---sense---sense---sense---sense---sense---sense---sense-------
 
+      readIR();
+      for (int i=0; i<sizeof(IRarray); i++){
+        Serial.print(IRarray[i]);
+        Serial.print(" ");
+        
+      }
+      Serial.println("");
+
       // TODO add sensor code here
 
       // THINK think---think---think---think---think---think---think---think---think---think---think---------
