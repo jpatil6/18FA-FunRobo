@@ -79,8 +79,8 @@ int IRarray[6] = {0, 0, 0, 0, 0, 0};
 //Think variables
 
 //Move variables
-const int rudderPin = 11;
-const int propellorPin = 12;
+const int rudderPin = 7;
+const int propellorPin = 5;
 Servo rudder;
 Servo propellor;
 int setspeed;
@@ -113,7 +113,9 @@ void setup() {      // Step 1)Put your robot setup code here, to run once:
   //Think initializing
 
   //Move initializing
-
+  propellor.attach(propellorPin);
+  rudder.attach(rudderPin);
+  propellor.writeMicroseconds(1400);
 }
 
 //=============================================================================
@@ -205,7 +207,7 @@ void loop() {
 
       // ACT-act---act---act---act---act---act---act---act---act---act---act---act---act---act------------
 
-
+      Serial.println(cycleTime);
       // Check to see if all code ran successfully in one real-time increment
       cycleTime = millis() - newLoopTime;   // calculate loop execution time
       if ( cycleTime > controlLoopInterval) {
@@ -320,7 +322,7 @@ void manualArbiter(){
   Serial.println(F("Entered manual mode. Type 's' to exit mode"));
   char inbit;
   bool keepManual = true;
-  int steptime = 100;
+  int steptime = 10;
   while(keepManual)
   {
     if(Serial.available())
@@ -329,7 +331,7 @@ void manualArbiter(){
       switch(inbit)
       {
         case 'w':
-          setspeed = 20;
+          setspeed = 40;
           setdirection = 0;
           break;
         case 's':
@@ -337,25 +339,29 @@ void manualArbiter(){
           setdirection = 0;
           break;
         case 'q':
-          setspeed = 15;
+          setspeed = 30;
           setdirection = -15;
           break;
         case 'e':
-          setspeed = 15;
+          setspeed = 30;
           setdirection = 15;
           break;
         case 'a':
-          setspeed = 10;
+          setspeed = 20;
           setdirection = -30;
           break;
         case 'd':
-          setspeed = 10;
+          setspeed = 20;
           setdirection = 30;
           break;
         case 'x':
           setspeed = 0;
           setdirection = 0;
           keepManual = false;
+          break;
+        case 'o':
+          setspeed = 0;
+          setdirection = 0;
           break;
         default:
           Serial.println("Wrong input! Terminating manual mode");
@@ -364,9 +370,9 @@ void manualArbiter(){
       }//close switch
     moveboat();
     delay(steptime);
-    setspeed = 0;
-    setdirection = 0;
-    moveboat();
+    //setspeed = 0;
+    //setdirection = 0;
+    //moveboat();
     }//close if Serial.available 
   }//close while keepManual
 }//close manualArbiter
@@ -374,10 +380,21 @@ void manualArbiter(){
 
 // ACT functions act---act---act---act---act---act---act---act---act---act---act---act---act---
 
-// move function
+void centerServos()
+{
+  bool needtocenter = true;
+  char inbit[4];
+  while(needtocenter)
+  {
+    
+  }
+}
+// moveboat function
 void moveboat()
 {
-  
+  rudder.write(map(setdirection,-90,90,-5,175));
+  Serial.println(map(setspeed,-100,100,900,1900));
+  propellor.writeMicroseconds(map(setspeed,-100,100,900,1900));
 }
 
 // END of Functions
