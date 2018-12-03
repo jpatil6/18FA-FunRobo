@@ -68,12 +68,12 @@ const int sonar3 = 2;  //sets signal pin for third sonar sensor
 int trigger = 13;  //sets 1 trigger pin for all 3 sensors
 float sonarArray[3] = {0, 0, 0};
 
-SharpIR IR1(A0,100500);
-SharpIR IR2(A1,100500);
-SharpIR IR3(A2,100500);
-SharpIR IR4(A3,100500);
-SharpIR IR5(A4,100500);
-SharpIR IR6(A5,100500);
+SharpIR IR1(SharpIR::GP2Y0A02YK0F, A0);
+SharpIR IR2(SharpIR::GP2Y0A02YK0F, A1);
+SharpIR IR3(SharpIR::GP2Y0A02YK0F, A2);
+SharpIR IR4(SharpIR::GP2Y0A02YK0F, A3);
+SharpIR IR5(SharpIR::GP2Y0A02YK0F, A4);
+SharpIR IR6(SharpIR::GP2Y0A02YK0F, A5);
 int IRarray[6] = {0, 0, 0, 0, 0, 0};
 
 //Think variables
@@ -284,12 +284,12 @@ void findTarget()
 // IR function
 void readIR() {
   /* Uses the getDistance function from SharpIR library to get distances in cm*/
-  IRarray[0] = IR1.distance();
-  IRarray[1] = IR2.distance();
-  IRarray[2] = IR3.distance();
-  IRarray[3] = IR4.distance();
-  IRarray[4] = IR5.distance();
-  IRarray[5] = IR6.distance();
+  IRarray[0] = IR1.getDistance();
+  IRarray[1] = IR2.getDistance();
+  IRarray[2] = IR3.getDistance();
+  IRarray[3] = IR4.getDistance();
+  IRarray[4] = IR5.getDistance();
+  IRarray[5] = IR6.getDistance();
 }
 
 // Sonar functions
