@@ -14,7 +14,7 @@ int heading = 0;
 
 
 boolean realTimeRunStop=true;         //create a name for real time control loop flag
-String command ="stop    ";           //create a String object name for operator command string
+String command ="stop";               //create a String object name for operator command string
 String loopError="no error";          //create a String for the real time control loop error system
 unsigned long oldLoopTime=0;          //create a name for past loop time in milliseconds
 unsigned long newLoopTime=0;          //create a name for new loop time in milliseconds
@@ -23,36 +23,12 @@ const long controlLoopInterval=1000;  //create a name for control loop cycle tim
 
 void setup() {
   Serial.begin (9600);
-  prop.attach (propPin);
-  rudder.attach (rudderPin);
-  prop.writeMicroseconds(1300);   // pls correct idle speed
+  prop.attach(propPin);
+  rudder.attach(rudderPin);
+  prop.writeMicroseconds(1350);   // pls correct idle speed
   delay (500);
   Serial.println ("CAREFULL ROBOT IS RUNNING");
 }
-String getOperatorInput (){
-  // This function prints operator command options on the serial console and prompts 
-  // operator to input desired robot command
-  // Serial.println("  ") 
-  
-  Serial.println("Enter speedcommand)");
-  while (Serial.available() ==0) {};                     // do nothing until operator input typed
-  command = Serial.readString();                         // read command string
-  command.trim ();
-  Serial.print(" New speedcommand is:    ");  // give command feedback to operator 
-  Serial.println(command); 
-  command = speedcommand;
-  Serial.println("Enter heading)");
-  while (Serial.available() ==0) {};                     // do nothing until operator input typed
-  command = Serial.readString();                         // read command string
-  command.trim ();
-  Serial.print(" New heading is:    ");  // give command feedback to operator 
-  Serial.println(command); 
-  command = heading;
-  Serial.println("| Type 'stop' to stop control loop and wait for new command                             |"); 
-  Serial.println("=========================================================================================");
-  return command;
-}
-
 
 void loop() {
 
@@ -79,10 +55,35 @@ void loop() {
         realTimeRunStop=false;      //exit real time control loop
         break;
       }
-    else { 
+    else if (command=="move"){
+      Serial.println("Enter speedcommand)");
+      while (Serial.available() ==0) {};                     // do nothing until operator input typed
+      speedcommand = Serial.readString().toInt();                         // read command string
+      //command.trim ();
+      //Serial.print(" New speedcommand is:    ");  // give command feedback to operator 
+      //Serial.println(speedcommand); 
+      //command = speedcommand;
+      Serial.println("Enter heading)");
+      while (Serial.available() ==0) {};                     // do nothing until operator input typed
+      heading = Serial.readString().toInt();                         // read command string
+      //command.trim ();
+      //Serial.print(" New heading is:    ");  // give command feedback to operator 
+      //Serial.println(command); 
+      //command = heading; 
       Move(speedcommand, heading);
     }
   }
+}
+
+String getOperatorInput (){
+  // This function prints operator command options on the serial console and prompts 
+  // operator to input desired robot command
+  // Serial.println("  ")
+  Serial.println("| Type 'stop' to stop control loop, or 'move'                             |"); 
+  Serial.println("===========================================================================");
+  while (Serial.available() ==0) {};
+  command = Serial.readString();
+  return command;
 }
 
 void Move(int speedPercentage, int setDirection){
@@ -106,7 +107,7 @@ void Move(int speedPercentage, int setDirection){
   }
   */
   rudderAngle = map(setDirection, -90,90, 180, 0);
-  rudder.write (rudderAngle);
+  rudder.write(rudderAngle);
   prop.writeMicroseconds(microSec);
   
 }
