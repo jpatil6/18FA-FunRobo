@@ -60,13 +60,15 @@ Pixy2 pixy;
 
 //Sonar and IR variables
 
-int objectArray[18];
+int objectArray[17];
+
+int sensorThreshhold = 5;
 
 const int sonar1 = A8;  //sets signal pin for first sonar sensor
 const int sonar2 = A9;  //sets signal pin for second sonar sensor
 const int sonar3 = A10;  //sets signal pin for third sonar sensor
 int trigger = 13;  //sets 1 trigger pin for all 3 sensors
-int sonarZones[] = {0,0,0,0,0};
+int sonarArray[] = {0,0,0,0,0,0};
 
 SharpIR IR1(SharpIR::GP2Y0A02YK0F, A2);
 SharpIR IR2(SharpIR::GP2Y0A02YK0F, A3);
@@ -275,6 +277,32 @@ String getOperatorInput()
 
 // SENSE functions sense---sense---sense---sense---sense---sense---sense---sense---sense---
 
+void findObjects()
+{
+  targetArray = {50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50};
+  readIR();
+  readSonar();
+  
+  for(int reading = 0; reading >= 5; reading++)
+  { 
+    int objectPos; //b in the gaussian function
+    int objectWidth; //c in the gaussian functions, the std deviatiation
+    int objectSize; // a in the gaussian function
+    if(abs(IRarray[reading] - sonarArray[reading]) > sensorThreshhold)
+    {
+      IRarray[reading] = 0;
+    }
+    objectPos = map(reading,0,5,0,18); // needs to be rounded
+    objectWidth = 1;
+    objectSize = map(IRarray[reading],20,120,50,10);
+    int objectArrayTemp[17];
+    for (int entry = 0; entry <= sizeof(objectArray); i++) // then make a gaussian function with those values
+      {
+        objectArrayTemp[entry] = objectSize*exp((entry-objectPos)^2/(2*objectWidth^2));
+        // then we populate target array with the values of the gaussian function from 0 to 17
+      }
+    objectArray -= objectArrayTemp;
+}
 
 // Pixy function
 
@@ -292,7 +320,7 @@ void findTarget()
       if (pixy.ccc.blocks[i].m_width * pixy.ccc.blocks[i].m_height >= 100)//and it's big:
       {
         //this area threshold is arbitrary right now
-        targetPos = map(pixy.ccc.blocks[i].m_x, 0, 316, 0, 180); //we find where it is
+        targetPos = map(pixy.ccc.blocks[i].m_x, 0, 316, 0, 18); //we find where it is
         targetWidth = map(pixy.ccc.blocks[i].m_width,1,316,1,3); // and how much of our field of view it takes
         targetSize = map(pixy.ccc.blocks[i].m_height,1,208,50,100); // and how close it is, based on height
         
@@ -319,16 +347,17 @@ void readIR() {
   IRarray[5] = IR6.getDistance();
 }
 
+
 // Sonar functions
 float mapSonar(float reading)
 {
-  return 0.0 + (reading - 0.0) * (18.0 - 0.0) / (19.0 - 0.0);
+  return (0.0 + (reading - 0.0) * (18.0 - 0.0) / (19.0 - 0.0))*2.54;
 }
 
 void readSonar() {
   /*
     Scale factor is (Vcc/512) per inch. A 5V supply yields ~9.8mV/in
-    Arduino analog pin goes from 0 to 1024, so the value has to be divided by 2 to get the actual inches
+    Arduino analog pin goes from 0 to 1024, so the value has to be divided by 2 to get the actual cm
   */
   // this function alters the sonarZones array. After it runs, 0 in the array means there is nothing there,
   // and 1 means there is something there.
@@ -340,46 +369,12 @@ void readSonar() {
   float reading2 = mapSonar(analogRead(sonar2) / 2.0);
   float reading3 = mapSonar(analogRead(sonar3) / 2.0);
 
-  if (reading1 < 50) //if there's something the sonar sees within the range of the IR
-  {
-    sonarZones[0] = 1; // it says there's something in that zone
-  }
-  else
-  {
-    sonarZones[0] = 0;
-  }
-  if (reading1 < 50 && reading1-reading2 < 3) //if the two readings are basically the same for sonar1 & 2
-  {
-    sonarZones[1] = 1; //then it says there's something in the second zone
-  }
-  else
-  {
-    sonarZones[1] = 0;
-  }
-  if (reading2 < 50) //if there's something the sonar sees within the range of the IR
-  {
-    sonarZones[2] = 1; // it says there's something in that zone
-  }
-  else
-  {
-    sonarZones[2] = 0;
-  }
-  if (reading2 < 50 && reading2-reading3 < 3) //if the two readings are basically the same for sonar2 & 3
-  {
-    sonarZones[3] = 1; //then it says there's something in the second zone
-  }
-  else
-  {
-    sonarZones[3] = 0;
-  }
-   if (reading3 < 50) //if there's something the sonar sees within the range of the IR
-  {
-    sonarZones[4] = 1; // it says there's something in that zone
-  }
-  else
-  {
-    sonarZones[4] = 0;
-  }
+  sonarArray[0] = reading1;
+  sonarArray[1] = reading1;
+  sonarArray[2] = reading2;
+  sonarArray[3] = reading2;
+  sonarArray[4] = reading3;
+  sonarArray[5] = reading3;
 }
 
 
