@@ -51,7 +51,7 @@ const long controlLoopInterval = 1000; //create a name for control loop cycle ti
 
 // OCU and communication variables
 
-TugNeoPixel neo = TugNeoPixel(7, 16);  //initialize NeoPixel object
+TugNeoPixel neo = TugNeoPixel(8, 16);  //initialize NeoPixel object
 
 //Pixy variables
 
@@ -62,18 +62,18 @@ Pixy2 pixy;
 
 int objectArray[18];
 
-const int sonar1 = 0;  //sets signal pin for first sonar sensor
-const int sonar2 = 1;  //sets signal pin for second sonar sensor
-const int sonar3 = 2;  //sets signal pin for third sonar sensor
+const int sonar1 = A8;  //sets signal pin for first sonar sensor
+const int sonar2 = A9;  //sets signal pin for second sonar sensor
+const int sonar3 = A10;  //sets signal pin for third sonar sensor
 int trigger = 13;  //sets 1 trigger pin for all 3 sensors
 float sonarArray[3] = {0, 0, 0};
 
-SharpIR IR1(SharpIR::GP2Y0A02YK0F, A0);
-SharpIR IR2(SharpIR::GP2Y0A02YK0F, A1);
-SharpIR IR3(SharpIR::GP2Y0A02YK0F, A2);
-SharpIR IR4(SharpIR::GP2Y0A02YK0F, A3);
-SharpIR IR5(SharpIR::GP2Y0A02YK0F, A4);
-SharpIR IR6(SharpIR::GP2Y0A02YK0F, A5);
+SharpIR IR1(SharpIR::GP2Y0A02YK0F, A2);
+SharpIR IR2(SharpIR::GP2Y0A02YK0F, A3);
+SharpIR IR3(SharpIR::GP2Y0A02YK0F, A4);
+SharpIR IR4(SharpIR::GP2Y0A02YK0F, A5);
+SharpIR IR5(SharpIR::GP2Y0A02YK0F, A6);
+SharpIR IR6(SharpIR::GP2Y0A02YK0F, A7);
 int IRarray[6] = {0, 0, 0, 0, 0, 0};
 
 //Think variables
@@ -317,7 +317,11 @@ void readSonar() {
 
 // THINK functions think---think---think---think---think---think---think---think---think---
 
-// Think functions
+// Manual arbiter
+// Receives characters from serial to manually navigate the boat by adjusting rudder(in deg) 
+// and propellor settings (in % speed). 
+// 'wasd' for standard front-left-back-right, 'qe' for slight left-right,
+// 'zc' for extreme left-right. 'o' to idle, 'x' to exit manual mode
 void manualArbiter(){
   Serial.println(F("Entered manual mode. Type 's' to exit mode"));
   char inbit;
@@ -398,6 +402,7 @@ void centerServos()
   }
 }
 // moveboat function
+//Note: Needs calibration of the center. currently rudder center = 85, prop center = 1400 
 void moveboat()
 {
   rudder.write(map(setdirection,-90,90,-5,175));
