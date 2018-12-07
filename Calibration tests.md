@@ -4,7 +4,7 @@
 
 7.91V on both
 
-Event Notes: Imabalanced boat: batteries \
+Event Notes: Imbalanced boat: batteries \
 Test run 1: speed: 50%, distance = 13ft, time:5.65s.\
 Test run 2: speed: 50%, distance = 13ft, time:6.01s.
 
@@ -73,3 +73,62 @@ At 30% speed. 60degree port bumbledee diameter: 89cm  <br/>
 At 30% speed. 20degree port bumbledee diameter: 345cm  <br/>
 At 30% speed. 40degree port bumbledee diameter: 157cm  <br/>
 At 30% speed. 60degree port bumbledee diameter: 120cm  <br/>
+
+-----------------------------------------------------------------------------------
+## After Testing the actual rudder angles, we realised that the max rudder turns are not symmetrical and they can only turn +/- 45 degrees. So the Bumblebee calibration tests need to be conducted again with angles of +/- 15,30,45.
+
+# Bumblebee circle calibration test v2
+
+## Timing tests
+
+At 30% speed. 30 degree port 21.26 secs <br/>
+At 30% speed. 30 degree port 20.56 secs <br/>
+At 30% speed. 30 degree port 20.66 secs
+
+At 30% speed. 45 degree port 18.03 secs <br/>
+At 30% speed. 45 degree port 17.8 secs <br/>
+At 30% speed. 45 degree port 16 secs
+
+## Tape measure tests
+At 30% speed. 30degree port bumbledee diameter: 226cm  <br/>
+At 30% speed. 30degree port bumbledee diameter: 234cm  <br/>
+At 30% speed. 30degree port bumbledee diameter: 254cm
+
+At 30% speed. 45degree port bumbledee diameter: 162 cm  <br/>
+At 30% speed. 45degree port bumbledee diameter: 147cm  <br/>
+At 30% speed. 45degree port bumbledee diameter: 125 cm
+
+## Timing tests
+
+At 30% speed. 30 degree starboard  20.4 secs <br/>
+At 30% speed. 30 degree starboard  19.49 secs <br/>
+At 30% speed. 30 degree starboard 20.34 secs
+
+At 30% speed. 45 degree starboard 18 secs <br/>
+At 30% speed. 45 degree starboard 18.13 secs <br/>
+At 30% speed. 45 degree starboard  secs
+
+## Tape measure tests
+At 30% speed. 30degree starboard bumbledee diameter: 203  <br/>
+At 30% speed. 30degree starboard bumbledee diameter: 233  <br/>
+At 30% speed. 30degree starboard bumbledee diameter: 203
+
+At 30% speed. 45degree starboard bumbledee diameter:  124 <br/>
+At 30% speed. 45degree starboard bumbledee diameter:  124 <br/>
+At 30% speed. 45degree starboard bumbledee diameter: 
+
+
+## For 15 degree tests since the radius was very large, we measured a quadrant
+At 30% speed. 15 degree port  36.44 secs <br/>
+At 30% speed. 15 degree port  38.32 secs 
+
+At 30% speed. 15 degree port bumbledee diameter: 447 cm <br/>
+At 30% speed. 15 degree port bumbledee diameter: 467 cm
+
+At 30% speed. 15 degree starboard  37.48 secs <br/>
+At 30% speed. 15 degree starboard  37.04 secs <br/>
+At 30% speed. 15 degree starboard 35.56 secs
+
+At 30% speed. 15 degree starboard bumbledee diameter: 444.5 cm <br/>
+At 30% speed. 15 degree starboard bumbledee diameter: 467 cm  <br/>
+At 30% speed. 15 degree starboard bumbledee diameter: 462 cm

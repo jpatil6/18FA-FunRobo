@@ -66,7 +66,11 @@ const int sonar1 = A3;  //sets signal pin for first sonar sensor
 const int sonar2 = A4;  //sets signal pin for second sonar sensor
 const int sonar3 = A5;  //sets signal pin for third sonar sensor
 int trigger = 13;  //sets 1 trigger pin for all 3 sensors
+<<<<<<< HEAD
 int sonarZones[] = {0,0,0,0,0,0};
+=======
+float sonarArray[3] = {0, 0, 0};
+>>>>>>> origin
 
 SharpIR IR1(SharpIR::GP2Y0A02YK0F, A8);
 SharpIR IR2(SharpIR::GP2Y0A02YK0F, A9);
