@@ -55,12 +55,12 @@ TugNeoPixel neo = TugNeoPixel(8, 16);  //initialize NeoPixel object
 
 //Pixy variables
 
-int targetArray[17];
+int targetArray[18];
 Pixy2 pixy;
 
 //Sonar and IR variables
 
-int objectArray[17];
+int objectArray[18];
 
 int sensorThreshhold = 5;
 
@@ -68,7 +68,7 @@ const int sonar1 = A8;  //sets signal pin for first sonar sensor
 const int sonar2 = A9;  //sets signal pin for second sonar sensor
 const int sonar3 = A10;  //sets signal pin for third sonar sensor
 int trigger = 13;  //sets 1 trigger pin for all 3 sensors
-int sonarArray[] = {0,0,0,0,0,0};
+int sonarArray[] = {0, 0, 0, 0, 0, 0};
 
 SharpIR IR1(SharpIR::GP2Y0A02YK0F, A2);
 SharpIR IR2(SharpIR::GP2Y0A02YK0F, A3);
@@ -81,8 +81,8 @@ int IRarray[6] = {0, 0, 0, 0, 0, 0};
 //Think variables
 
 // these are the values that our voting function changes. They tell the boat where to go.
-int theta
-int magnitude
+int theta;
+int magnitude;
 
 //Move variables
 const int rudderPin = 7;
@@ -97,7 +97,8 @@ int setdirection;
 // Startup code to configure robot and pretest all robot functionality (to run once)
 // and code to setup robot mission for launch.
 //=========================================================================================
-void setup() {      // Step 1)Put your robot setup code here, to run once:
+void setup() 
+{      // Step 1)Put your robot setup code here, to run once:
   
   Serial.begin(9600);                 // start serial communications
   neo.begin();                        // start the NeoPixel
@@ -185,17 +186,17 @@ void loop() {
         manualArbiter();
         realTimeRunStop = false;     // exit loop after running once
       }
-      else if (command == "wallfollow") { 
+      else if (command == "wall follow") { 
         // Add wallfollow code
         Serial.println("Type stop to stop robot");
         realTimeRunStop = true;     //run loop continually
       }
-      else if (command == "fig8") { 
+      else if (command == "figure 8") { 
         // Add fig8 code
         Serial.println("Type stop to stop robot");
         realTimeRunStop = true;     //run loop continually
       }
-      else if (command == "fig8dock") { 
+      else if (command == "figure 8 dock") { 
         // Add fig8dock code
         Serial.println("Type stop to stop robot");
         realTimeRunStop = true;     //run loop continually
