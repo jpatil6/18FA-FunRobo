@@ -284,10 +284,12 @@ String getOperatorInput()
 
 void findObjects()
 {
-  targetArray = {50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50};
+  for (int entry = 0; entry = 18; entry++)
+  {
+    targetArray[entry] = 50;
+  }
   readIR();
   readSonar();
-  
   for(int reading = 0; reading >= 5; reading++)
   { 
     int objectPos; //b in the gaussian function
@@ -306,14 +308,20 @@ void findObjects()
         objectArrayTemp[entry] = objectSize*exp((entry-objectPos)^2/(2*objectWidth^2));
         // then we populate target array with the values of the gaussian function from 0 to 17
       }
-    objectArray -= objectArrayTemp;
+    for (int entry = 0; entry = 18; entry++)
+    {
+      objectArray[entry] = objectArray[entry] - objectArrayTemp[entry];
+    }
 }
 
 // Pixy function
 
 void findPixyTarget()
 {
-  targetArray = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  for (int entry = 0; entry = 18; entry++
+  {
+    targetArray[entry] = 0;
+  }
   int targetPos; //b in the gaussian function
   int targetWidth; //c in the gaussian functions, the std deviatiation
   int targetSize; // a in the gaussian function
