@@ -55,12 +55,16 @@ TugNeoPixel neo = TugNeoPixel(8, 16);  //initialize NeoPixel object
 
 //Pixy variables
 
+<<<<<<< HEAD
 int targetArray[17];
+=======
+int targetArray[19];
+>>>>>>> origin
 Pixy2 pixy;
 
 //Sonar and IR variables
 
-int objectArray[18];
+int objectArray[19];
 
 const int sonar1 = A3;  //sets signal pin for first sonar sensor
 const int sonar2 = A4;  //sets signal pin for second sonar sensor
