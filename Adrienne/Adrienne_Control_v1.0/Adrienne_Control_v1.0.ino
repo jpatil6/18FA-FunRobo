@@ -62,25 +62,25 @@ Pixy2 pixy;
 
 int objectArray[18];
 
-const int sonar1 = A8;  //sets signal pin for first sonar sensor
-const int sonar2 = A9;  //sets signal pin for second sonar sensor
-const int sonar3 = A10;  //sets signal pin for third sonar sensor
+const int sonar1 = A3;  //sets signal pin for first sonar sensor
+const int sonar2 = A4;  //sets signal pin for second sonar sensor
+const int sonar3 = A5;  //sets signal pin for third sonar sensor
 int trigger = 13;  //sets 1 trigger pin for all 3 sensors
-int sonarZones[] = {0,0,0,0,0};
+int sonarZones[] = {0,0,0,0,0,0};
 
-SharpIR IR1(SharpIR::GP2Y0A02YK0F, A2);
-SharpIR IR2(SharpIR::GP2Y0A02YK0F, A3);
-SharpIR IR3(SharpIR::GP2Y0A02YK0F, A4);
-SharpIR IR4(SharpIR::GP2Y0A02YK0F, A5);
-SharpIR IR5(SharpIR::GP2Y0A02YK0F, A6);
-SharpIR IR6(SharpIR::GP2Y0A02YK0F, A7);
+SharpIR IR1(SharpIR::GP2Y0A02YK0F, A8);
+SharpIR IR2(SharpIR::GP2Y0A02YK0F, A9);
+SharpIR IR3(SharpIR::GP2Y0A02YK0F, A10);
+SharpIR IR4(SharpIR::GP2Y0A02YK0F, A11);
+SharpIR IR5(SharpIR::GP2Y0A02YK0F, A12);
+SharpIR IR6(SharpIR::GP2Y0A02YK0F, A13);
 int IRarray[6] = {0, 0, 0, 0, 0, 0};
 
 //Think variables
 
 //Move variables
 const int rudderPin = 7;
-const int propellorPin = 5;
+const int propellorPin = 6;
 Servo rudder;
 Servo propellor;
 int setspeed;
@@ -280,7 +280,7 @@ String getOperatorInput()
 
 void findTarget()
 {
-  targetArray = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  //targetArray = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
   int targetPos; //b in the gaussian function
   int targetWidth; //c in the gaussian functions, the std deviatiation
   int targetSize; // a in the gaussian function
@@ -412,27 +412,27 @@ void manualArbiter(){
           break;
         case 'q':
           setspeed = 30;
-          setdirection = -20;
+          setdirection = -15;
           break;
         case 'e':
           setspeed = 30;
-          setdirection = 20;
+          setdirection = 15;
           break;
         case 'a':
           setspeed = 30;
-          setdirection = -40;
+          setdirection = -30;
           break;
         case 'd':
           setspeed = 30;
-          setdirection = 40;
+          setdirection = 30;
           break;
         case 'z':
           setspeed = 30;
-          setdirection = -60;
+          setdirection = -45;
           break;
         case 'c':
           setspeed = 30;
-          setdirection = 60;
+          setdirection = 45;
           break;
         case 'x':
           setspeed = 0;

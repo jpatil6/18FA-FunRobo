@@ -1,17 +1,17 @@
 /*****************************************************************************************
- * Title: 2018 Fun-Robo Narwhal-tracking autonomous tugboat (ENGR3390 final project 1)
- * Description: This structure template contains a SENSE-THINK-ACT flow to
+   Title: 2018 Fun-Robo Narwhal-tracking autonomous tugboat (ENGR3390 final project 1)
+   Description: This structure template contains a SENSE-THINK-ACT flow to
    allow a robotic tugboat to perform a sequence of meta-behaviors in soft-real-time
    based on direct text commands from a human operator.
- * Robot Name: Adrienne
- * What does code do: poll open, 
-   sense: Detect range and bearing of target and obstacles with the Pixycam and IR sensors 
-   think: Combine bearing arrays for target and obstacles to optimize bearing of the tugboat. 
+   Robot Name: Adrienne
+   What does code do: poll open,
+   sense: Detect range and bearing of target and obstacles with the Pixycam and IR sensors
+   think: Combine bearing arrays for target and obstacles to optimize bearing of the tugboat.
           If unobstructed on set bearing, calculate propellor speed proportional to range
    act:   Set table motor and rudder bearing, set propellor speed
    carry out operator text input, loop indefinitely
- * Hardware warnings: Do not wire the Pixycam ICSP arduino I/O pin the wrong way around.
- * XBEE:1. Set shield SerialSelect switch to SW_SER for uploading code. 
+   Hardware warnings: Do not wire the Pixycam ICSP arduino I/O pin the wrong way around.
+   XBEE:1. Set shield SerialSelect switch to SW_SER for uploading code.
         2. Set it back to HW_SER and put the XBee back onto shield.
         3. Remove USB cable. Use XCTU terminal to communicate with arduino
    Created by J.Patil, V.Deturck, E.O'Brien, H.Khoury. Dec 2018
@@ -21,11 +21,11 @@
 //
 // TODO:
 //      OCU/COMM- Upon 'stop', set rudder and prop to 0 before terminating loop
-//              - Add NeoPixel states and code     
+//              - Add NeoPixel states and code
 //      SENSE:  - Pending combination of IR+Sonar into objectArray
 //              - Pending findTarget function (also include Dock as target)
 //      THINK:  - Pending Dead Reckoning + BumbleBee arbiter + find center function
-//              - Create Mission Definiton file and structure 
+//              - Create Mission Definiton file and structure
 //      ACT:    - Pending moveboat() function
 
 //========================================================================================
@@ -34,7 +34,6 @@
 #include <Servo.h>        // ServoMotors library
 #include <Pixy2.h>        // Pixy Library
 #include <SPI.h>          //
-#include <SharpIR.h>      // IR sensors library
 #include <TugNeoPixel.h>  // NeoPixel Ring library
 
 //========================================================================================
@@ -55,37 +54,45 @@ TugNeoPixel neo = TugNeoPixel(8, 16);  //initialize NeoPixel object
 
 //Pixy variables
 
-int targetArray[17];
+int targetArray[19];
 Pixy2 pixy;
 
 //Sonar and IR variables
 
-int objectArray[17];
+int objectArray[19];
 
 int sensorThreshhold = 5;
+const int sonar1 = A3;  //sets signal pin for first sonar sensor
+const int sonar2 = A4;  //sets signal pin for second sonar sensor
+const int sonar3 = A5;  //sets signal pin for third sonar sensor
+int trigger = 12;  //sets 1 trigger pin for all 3 sensors
+int sonarArray[6] = {};
+void readSonar();
 
-const int sonar1 = A8;  //sets signal pin for first sonar sensor
-const int sonar2 = A9;  //sets signal pin for second sonar sensor
-const int sonar3 = A10;  //sets signal pin for third sonar sensor
-int trigger = 13;  //sets 1 trigger pin for all 3 sensors
-int sonarArray[] = {0,0,0,0,0,0};
-
-SharpIR IR1(SharpIR::GP2Y0A02YK0F, A2);
-SharpIR IR2(SharpIR::GP2Y0A02YK0F, A3);
-SharpIR IR3(SharpIR::GP2Y0A02YK0F, A4);
-SharpIR IR4(SharpIR::GP2Y0A02YK0F, A5);
-SharpIR IR5(SharpIR::GP2Y0A02YK0F, A6);
-SharpIR IR6(SharpIR::GP2Y0A02YK0F, A7);
-int IRarray[6] = {0, 0, 0, 0, 0, 0};
+const int IR1 = 8;
+const int IR2 = 9;
+const int IR3 = 10;
+const int IR4 = 11;
+const int IR5 = 12;
+const int IR6 = 13;
+int IRarray[5] = {};
+void readIR();
+int IRreadingCount = 20;
 
 //Think variables
 
+// these are the values that our voting function changes. They tell the boat where to go.
+int theta;
+int magnitude;
+void manualArbiter();
+void moveboat();
+
 //Move variables
 const int rudderPin = 7;
-const int propellorPin = 5;
+const int propellorPin = 6;
 Servo rudder;
 Servo propellor;
-int setspeed;
+int setspeed; // these directly tell the boat where to go
 int setdirection;
 
 
@@ -93,8 +100,9 @@ int setdirection;
 // Startup code to configure robot and pretest all robot functionality (to run once)
 // and code to setup robot mission for launch.
 //=========================================================================================
-void setup() {      // Step 1)Put your robot setup code here, to run once:
-  
+void setup()
+{ // Step 1)Put your robot setup code here, to run once:
+
   Serial.begin(9600);                 // start serial communications
   neo.begin();                        // start the NeoPixel
   Serial.println(" Robot Controller Starting Up! Watch your fingers! ");
@@ -181,22 +189,22 @@ void loop() {
         manualArbiter();
         realTimeRunStop = false;     // exit loop after running once
       }
-      else if (command == "wallfollow") { 
+      else if (command == "wall follow") {
         // Add wallfollow code
         Serial.println("Type stop to stop robot");
         realTimeRunStop = true;     //run loop continually
       }
-      else if (command == "fig8") { 
+      else if (command == "figure 8") {
         // Add fig8 code
         Serial.println("Type stop to stop robot");
         realTimeRunStop = true;     //run loop continually
       }
-      else if (command == "fig8dock") { 
+      else if (command == "figure 8 dock") {
         // Add fig8dock code
         Serial.println("Type stop to stop robot");
         realTimeRunStop = true;     //run loop continually
       }
-      else if (command == "hunt") { 
+      else if (command == "hunt") {
         // Add hunt code
         Serial.println("Type stop to stop robot");
         realTimeRunStop = true;     //run loop continually
@@ -265,7 +273,7 @@ String getOperatorInput()
   Serial.println(F("|                                                                                    |"));
   Serial.println(F("| Please type desired robot behavior in command line and press enter.                |"));
   Serial.println(F("======================================================================================"));
-  while (Serial.available()==0) {};   // do nothing until operator input typed
+  while (Serial.available() == 0) {}; // do nothing until operator input typed
   command = Serial.readString();      // read command string
   //command.trim();
   Serial.print(F("| New robot behavior command is: "));    // give command feedback to operator
@@ -279,36 +287,45 @@ String getOperatorInput()
 
 void findObjects()
 {
-  targetArray = {50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50};
+  for (int entry = 0; entry = 18; entry++)
+  {
+    targetArray[entry] = 50;
+  }
   readIR();
   readSonar();
-  
-  for(int reading = 0; reading >= 5; reading++)
-  { 
+  for (int reading = 0; reading >= 5; reading++)
+  {
     int objectPos; //b in the gaussian function
     int objectWidth; //c in the gaussian functions, the std deviatiation
     int objectSize; // a in the gaussian function
-    if(abs(IRarray[reading] - sonarArray[reading]) > sensorThreshhold)
+    if (abs(IRarray[reading] - sonarArray[reading]) > sensorThreshhold)
     {
       IRarray[reading] = 0;
     }
-    objectPos = map(reading,0,5,0,18); // needs to be rounded
+    objectPos = map(reading, 0, 5, 0, 18); // needs to be rounded
     objectWidth = 1;
-    objectSize = map(IRarray[reading],20,120,50,10);
-    int objectArrayTemp[17];
-    for (int entry = 0; entry <= sizeof(objectArray); i++) // then make a gaussian function with those values
-      {
-        objectArrayTemp[entry] = objectSize*exp((entry-objectPos)^2/(2*objectWidth^2));
-        // then we populate target array with the values of the gaussian function from 0 to 17
-      }
-    objectArray -= objectArrayTemp;
+    objectSize = map(IRarray[reading], 20, 120, 50, 10);
+    int objectArrayTemp[18];
+    for (int entry = 0; entry <= sizeof(objectArray); entry++) // then make a gaussian function with those values
+    {
+      objectArrayTemp[entry] = objectSize * exp((entry - objectPos) ^ 2 / (2 * objectWidth ^ 2));
+      // then we populate target array with the values of the gaussian function from 0 to 17
+    }
+    for (int entry = 0; entry = 18; entry++)
+    {
+      objectArray[entry] = objectArray[entry] - objectArrayTemp[entry];
+    }
+  }
 }
 
 // Pixy function
 
-void findTarget()
+void findPixyTarget()
 {
-  targetArray = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+  for (int entry = 0; entry = 18; entry++)
+  {
+    targetArray[entry] = 0;
+  }
   int targetPos; //b in the gaussian function
   int targetWidth; //c in the gaussian functions, the std deviatiation
   int targetSize; // a in the gaussian function
@@ -320,13 +337,13 @@ void findTarget()
       if (pixy.ccc.blocks[i].m_width * pixy.ccc.blocks[i].m_height >= 100)//and it's big:
       {
         //this area threshold is arbitrary right now
-        targetPos = map(pixy.ccc.blocks[i].m_x, 0, 316, 0, 18); //we find where it is
-        targetWidth = map(pixy.ccc.blocks[i].m_width,1,316,1,3); // and how much of our field of view it takes
-        targetSize = map(pixy.ccc.blocks[i].m_height,1,208,50,100); // and how close it is, based on height
-        
+        targetPos = map(pixy.ccc.blocks[i].m_x, 0, 316, 6, 12); //we find where it is
+        targetWidth = map(pixy.ccc.blocks[i].m_width, 1, 316, 1, 3); // and how much of our field of view it takes
+        targetSize = map(pixy.ccc.blocks[i].m_height, 1, 208, 50, 100); // and how close it is, based on height
+
         for (int entry = 0; entry <= sizeof(targetArray); i++) // then make a gaussian function with those values
         {
-          targetArray[entry] = targetSize*exp((entry-targetPos)^2/(2*targetWidth^2));
+          targetArray[entry] = targetSize * exp((entry - targetPos) ^ 2 / (2 * targetWidth ^ 2));
           // then we populate target array with the values of the gaussian function from 0 to 17
         }
         break;
@@ -337,24 +354,33 @@ void findTarget()
 
 
 // IR function
-void readIR() {
-  /* Uses the getDistance function from SharpIR library to get distances in cm*/
-  IRarray[0] = IR1.getDistance();
-  IRarray[1] = IR2.getDistance();
-  IRarray[2] = IR3.getDistance();
-  IRarray[3] = IR4.getDistance();
-  IRarray[4] = IR5.getDistance();
-  IRarray[5] = IR6.getDistance();
-}
-
-
-// Sonar functions
-float mapSonar(float reading)
+void readIR()
 {
-  return (0.0 + (reading - 0.0) * (18.0 - 0.0) / (19.0 - 0.0))*2.54;
+  /* Uses the getDistance function from SharpIR library to get distances in cm*/
+  IRarray[0] = averageOut(IR1);
+  IRarray[1] = averageOut(IR2);
+  IRarray[2] = averageOut(IR3);
+  IRarray[3] = averageOut(IR4);
+  IRarray[4] = averageOut(IR5);
+  IRarray[5] = averageOut(IR6);
 }
 
-void readSonar() {
+int averageOut( uint8_t pin) {
+  /* Averages out the IR reading to get a more accurate value */
+
+  int distance = 0;
+  int i = 1;
+  while (i < IRreadingCount) {
+    distance += int(pow(analogRead(pin), -1.02) * 13755); // empirically determined equation to calculate the distance in cm
+    i ++;
+  }
+  distance = int(distance / (i - 1));
+  return distance;
+}
+
+
+void readSonar()
+{
   /*
     Scale factor is (Vcc/512) per inch. A 5V supply yields ~9.8mV/in
     Arduino analog pin goes from 0 to 1024, so the value has to be divided by 2 to get the actual cm
@@ -365,9 +391,9 @@ void readSonar() {
   delay(1); //triggers the sonars/makes them take a reading
   digitalWrite(trigger, LOW);
 
-  float reading1 = mapSonar(analogRead(sonar1) / 2.0);
-  float reading2 = mapSonar(analogRead(sonar2) / 2.0);
-  float reading3 = mapSonar(analogRead(sonar3) / 2.0);
+  float reading1 = analogRead((sonar1) / 2.0);
+  float reading2 = analogRead((sonar2) / 2.0);
+  float reading3 = analogRead((sonar3) / 2.0);
 
   sonarArray[0] = reading1;
   sonarArray[1] = reading1;
@@ -377,6 +403,33 @@ void readSonar() {
   sonarArray[5] = reading3;
 }
 
+
+// THINK functions think---think---think---think---think---think---think---think---think---
+
+// Voting Function
+// Takes the gaussian functions from find object and find target and outputs an angle
+// and a distance to the point we want to go to.
+void votingFunc()
+{
+  int voteArray[19];
+  for (int entry = 0;entry < 19; entry++)
+  {
+    voteArray[entry] = targetArray[entry] + objectArray[entry];
+  }
+  int maximum = 0;
+  int maximumIndex = voteArray[19];
+  for (int entry = 0; entry < 19; entry++)
+  {
+    if (voteArray[entry] > maximum)
+    {
+      maximum = voteArray[entry];
+      maximumIndex = entry;
+    }
+  }
+  theta = maximum * 10; // so that we're giving the boat an angle.
+  magnitude = voteArray[maximum]; // A number from 0 to 150. It gets bigger as the target gets farther away
+
+}
 
 // THINK functions think---think---think---think---think---think---think---think---think---
 
@@ -452,18 +505,65 @@ void manualArbiter(){
   }//close while keepManual
 }//close manualArbiter
 
+// pickBumblebeeCircle
+// this function accepts a radius and theta to select the rudder and propellor settings
+//incoming r ranges from 0 to 150, theta goes from 0 to 180 degress
+void pickBumblebeeCircle(int r, double theta)
+{
+   
+   r = r*120/150;
+   theta = (180-theta)*PI/180;
+   //Serial.print("r: ");
+   //Serial.println(r);
+   //Serial.print("theta: ");
+   //Serial.println(theta);
+   
+   double zone[] = {-60,-191.5,-347.5,-914,916,333.5,168.5,60};
+   int turningmaxspeed[] = {30,45,60,75,60,45,30}; 
+   int turninglookup[] = {-45,-30,-15,0,15,30,45};
+   int i;
+   boolean valid =false;
+   
+   
+   for(i =0; i < 7; i++)
+   {
+      if(i==3){
+        if((r > zone[i]*cos(theta)) && (r > zone[i+1]*cos(theta)))
+        {
+          //Serial.print("In zone: ");
+          //Serial.println(i+1);
+          valid = true;
+          break;
+        }
+      }else{
+        if((r > zone[i]*cos(theta)) && (r < zone[i+1]*cos(theta)))
+        {
+          //Serial.print("In zone: ");
+          //Serial.println(i+1);
+          valid = true;
+          break;
+        }else if((r < zone[i]*cos(theta))&&(r > zone[i+1]*cos(theta))){
+          //Serial.print("In zone: ");
+          //Serial.println(i+1);
+          valid = true;
+          break;
+        }//end inner if
+      }//end outer if
+   }//end for
+   if(valid)
+   {
+      setdirection = turninglookup[i];
+      setspeed = (turningmaxspeed[i]*r/120); 
+   }else{
+      setspeed = 0;
+      setdirection = 0;
+   }
+}
+
+
 
 // ACT functions act---act---act---act---act---act---act---act---act---act---act---act---act---
 
-void centerServos()
-{
-  bool needtocenter = true;
-  char inbit[4];
-  while(needtocenter)
-  {
-    
-  }
-}
 // moveboat function
 //Note: Needs calibration of the center. currently rudder center = 85, prop center = 1400 
 void moveboat()
