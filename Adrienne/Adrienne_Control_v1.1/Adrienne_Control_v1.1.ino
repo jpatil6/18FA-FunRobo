@@ -80,12 +80,16 @@ int IRarray[6] = {0, 0, 0, 0, 0, 0};
 
 //Think variables
 
+// these are the values that our voting function changes. They tell the boat where to go.
+int theta
+int magnitude
+
 //Move variables
 const int rudderPin = 7;
 const int propellorPin = 5;
 Servo rudder;
 Servo propellor;
-int setspeed;
+int setspeed; // these directly tell the boat where to go
 int setdirection;
 
 
@@ -295,7 +299,7 @@ void findObjects()
     objectPos = map(reading,0,5,0,18); // needs to be rounded
     objectWidth = 1;
     objectSize = map(IRarray[reading],20,120,50,10);
-    int objectArrayTemp[17];
+    int objectArrayTemp[18];
     for (int entry = 0; entry <= sizeof(objectArray); i++) // then make a gaussian function with those values
       {
         objectArrayTemp[entry] = objectSize*exp((entry-objectPos)^2/(2*objectWidth^2));
@@ -306,7 +310,7 @@ void findObjects()
 
 // Pixy function
 
-void findTarget()
+void findPixyTarget()
 {
   targetArray = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
   int targetPos; //b in the gaussian function
@@ -320,7 +324,7 @@ void findTarget()
       if (pixy.ccc.blocks[i].m_width * pixy.ccc.blocks[i].m_height >= 100)//and it's big:
       {
         //this area threshold is arbitrary right now
-        targetPos = map(pixy.ccc.blocks[i].m_x, 0, 316, 0, 18); //we find where it is
+        targetPos = map(pixy.ccc.blocks[i].m_x, 0, 316, 6, 12); //we find where it is
         targetWidth = map(pixy.ccc.blocks[i].m_width,1,316,1,3); // and how much of our field of view it takes
         targetSize = map(pixy.ccc.blocks[i].m_height,1,208,50,100); // and how close it is, based on height
         
@@ -337,7 +341,8 @@ void findTarget()
 
 
 // IR function
-void readIR() {
+void readIR() 
+{
   /* Uses the getDistance function from SharpIR library to get distances in cm*/
   IRarray[0] = IR1.getDistance();
   IRarray[1] = IR2.getDistance();
@@ -349,12 +354,9 @@ void readIR() {
 
 
 // Sonar functions
-float mapSonar(float reading)
-{
-  return (0.0 + (reading - 0.0) * (18.0 - 0.0) / (19.0 - 0.0))*2.54;
-}
 
-void readSonar() {
+void readSonar()
+{
   /*
     Scale factor is (Vcc/512) per inch. A 5V supply yields ~9.8mV/in
     Arduino analog pin goes from 0 to 1024, so the value has to be divided by 2 to get the actual cm
@@ -365,9 +367,9 @@ void readSonar() {
   delay(1); //triggers the sonars/makes them take a reading
   digitalWrite(trigger, LOW);
 
-  float reading1 = mapSonar(analogRead(sonar1) / 2.0);
-  float reading2 = mapSonar(analogRead(sonar2) / 2.0);
-  float reading3 = mapSonar(analogRead(sonar3) / 2.0);
+  float reading1 = analogRead(sonar1) / 2.0);
+  float reading2 = analogRead(sonar2) / 2.0);
+  float reading3 = analogRead(sonar3) / 2.0);
 
   sonarArray[0] = reading1;
   sonarArray[1] = reading1;
@@ -380,12 +382,35 @@ void readSonar() {
 
 // THINK functions think---think---think---think---think---think---think---think---think---
 
+// Voting Function
+// Takes the gaussian functions from find object and find target and outputs an angle 
+// and a distance to the point we want to go to.
+void votingFunc()
+{
+  int voteArray[18];
+  voteArray = targetArray + objectArray;
+  int maximum = 0;
+  int maximumIndex = voteArray[18];
+  for (int entry = 0; i = 18; i++)
+  {
+    if (voteArray[entry] > maximum)
+  {
+    maximum = voteArray[entry];
+    maximumIndex = entry;
+  }
+  }
+  theta = maximum * 10; // so that we're giving the boat an angle.
+  magnitude = votingArray[maximum]; // A number from 0 to 150. It gets bigger as the target gets farther away
+  
+}
+
 // Manual arbiter
 // Receives characters from serial to manually navigate the boat by adjusting rudder(in deg) 
-// and propellor settings (in % speed). 
+// and propellor settings (in % speed).
 // 'wasd' for standard front-left-back-right, 'qe' for slight left-right,
 // 'zc' for extreme left-right. 'o' to idle, 'x' to exit manual mode
-void manualArbiter(){
+void manualArbiter()
+{
   Serial.println(F("Entered manual mode. Type 's' to exit mode"));
   char inbit;
   bool keepManual = true;
