@@ -1,34 +1,41 @@
-#include <SPI.h>
-
 /*****************************************************************************************
-   Title: 2018 (ENGR3390 final project 1)
-   Description: This structure template contains a SENSE-THINK-ACT flow to
-   allow a Robot to perform a sequence of meta-behaviors in soft-real-time based on direct
-   text commands from a human operator.
-   Robot Name: Simple PixyCam sensor
-   What does code do: poll open, sense: object recognition data from PixyCam camera every second,
-   think: whether the detected object and its location is a target or hole,
-   act: print the target/hole status and location of detected objects,
+ * Title: 2018 Fun-Robo Narwhal-tracking autonomous tugboat (ENGR3390 final project 1)
+ * Description: This structure template contains a SENSE-THINK-ACT flow to
+   allow a robotic tugboat to perform a sequence of meta-behaviors in soft-real-time
+   based on direct text commands from a human operator.
+ * Robot Name: Adrienne
+ * What does code do: poll open, 
+   sense: Detect range and bearing of target and obstacles with the Pixycam and IR sensors 
+   think: Combine bearing arrays for target and obstacles to optimize bearing of the tugboat. 
+          If unobstructed on set bearing, calculate propellor speed proportional to range
+   act:   Set table motor and rudder bearing, set propellor speed
    carry out operator text input, loop indefinitely
-   Hardware warnings: Do not wire the six headed arduino I/O pin the wrong way around.
-   Created by J.Patil October 2018
+ * Hardware warnings: Do not wire the Pixycam ICSP arduino I/O pin the wrong way around.
+ * XBEE:1. Set shield SerialSelect switch to SW_SER for uploading code. 
+        2. Set it back to HW_SER and put the XBee back onto shield.
+        3. Remove USB cable. Use XCTU terminal to communicate with arduino
+   Created by J.Patil, V.Deturck, E.O'Brien, H.Khoury. Dec 2018
  * ***************************************************************************************
 */
 
 //
 // TODO:
-//      SENSE:
-//      THINK:
-//      ACT:
+//      OCU/COMM- Upon 'stop', set rudder and prop to 0 before terminating loop
+//              - Add NeoPixel states and code     
+//      SENSE:  - Pending combination of IR+Sonar into objectArray
+//              - Pending findTarget function (also include Dock as target)
+//      THINK:  - Pending Dead Reckoning + BumbleBee arbiter + find center function
+//              - Create Mission Definiton file and structure 
+//      ACT:    - Pending moveboat() function
 
 //========================================================================================
 // Load supporting Arduino Libraries
 //========================================================================================
-#include <Servo.h>        //ServoMotors library
-#include <Pixy2.h>         // Pixy Library
+#include <Servo.h>        // ServoMotors library
+#include <Pixy2.h>        // Pixy Library
 #include <SPI.h>          //
 #include <SharpIR.h>      // IR sensors library
-#include <TugNeoPixel.h>  //NeoPixel Ring library
+#include <TugNeoPixel.h>  // NeoPixel Ring library
 
 //========================================================================================
 // Create and initialize global variables, objects and constants (containers for all data)
@@ -41,37 +48,43 @@ unsigned long newLoopTime = 0;    //create a name for new loop time in milliseco
 unsigned long cycleTime = 0;      //create a name for elapsed loop cycle time
 const long controlLoopInterval = 1000; //create a name for control loop cycle time in milliseconds
 
-TugNeoPixel neo = TugNeoPixel(7, 16);  //initialize NeoPixel object
+
+// OCU and communication variables
+
+TugNeoPixel neo = TugNeoPixel(8, 16);  //initialize NeoPixel object
 
 //Pixy variables
 
 int targetArray[17];
 Pixy2 pixy;
 
-//Sonar variables
+//Sonar and IR variables
 
-const int sonar1 = 0;  //sets signal pin for first sonar sensor
-const int sonar2 = 1;  //sets signal pin for second sonar sensor
-const int sonar3 = 2;  //sets signal pin for third sonar sensor
+int objectArray[18];
+
+const int sonar1 = A3;  //sets signal pin for first sonar sensor
+const int sonar2 = A4;  //sets signal pin for second sonar sensor
+const int sonar3 = A5;  //sets signal pin for third sonar sensor
 int trigger = 13;  //sets 1 trigger pin for all 3 sensors
 int sonarZones[] = {0,0,0,0,0};
 
-//IR variables
-SharpIR IR1(SharpIR::GP2Y0A02YK0F, A0);
-SharpIR IR2(SharpIR::GP2Y0A02YK0F, A1);
-SharpIR IR3(SharpIR::GP2Y0A02YK0F, A2);
-SharpIR IR4(SharpIR::GP2Y0A02YK0F, A3);
-SharpIR IR5(SharpIR::GP2Y0A02YK0F, A4);
-SharpIR IR6(SharpIR::GP2Y0A02YK0F, A5);
+SharpIR IR1(SharpIR::GP2Y0A02YK0F, A8);
+SharpIR IR2(SharpIR::GP2Y0A02YK0F, A9);
+SharpIR IR3(SharpIR::GP2Y0A02YK0F, A10);
+SharpIR IR4(SharpIR::GP2Y0A02YK0F, A11);
+SharpIR IR5(SharpIR::GP2Y0A02YK0F, A12);
+SharpIR IR6(SharpIR::GP2Y0A02YK0F, A13);
 int IRarray[6] = {0, 0, 0, 0, 0, 0};
 
 //Think variables
 
 //Move variables
-const int rudderPin = 11;
-const int propellorPin = 12;
+const int rudderPin = 7;
+const int propellorPin = 5;
 Servo rudder;
 Servo propellor;
+int setspeed;
+int setdirection;
 
 
 //=========================================================================================
@@ -79,6 +92,7 @@ Servo propellor;
 // and code to setup robot mission for launch.
 //=========================================================================================
 void setup() {      // Step 1)Put your robot setup code here, to run once:
+  
   Serial.begin(9600);                 // start serial communications
   neo.begin();                        // start the NeoPixel
   Serial.println(" Robot Controller Starting Up! Watch your fingers! ");
@@ -88,7 +102,7 @@ void setup() {      // Step 1)Put your robot setup code here, to run once:
 
   //Pixy initializing
 
-   pixy.init();
+  pixy.init();
 
   //Sonar initializing
 
@@ -99,7 +113,9 @@ void setup() {      // Step 1)Put your robot setup code here, to run once:
   //Think initializing
 
   //Move initializing
-
+  propellor.attach(propellorPin);
+  rudder.attach(rudderPin);
+  propellor.writeMicroseconds(1400);
 }
 
 //=============================================================================
@@ -162,13 +178,32 @@ void loop() {
         realTimeRunStop = false;    //exit real time control loop
         break;
       }
-      else if (command == "move") { //Move robot to Operator commanded position
-        Serial.println("Move robot ");
-        Serial.println("Type stop to stop robot");
-        realTimeRunStop = true;     //don't exit loop after running once
-      }
-      else if (command == "idle") { //Make robot alive with small motions
+      else if (command == "idle") {
         Serial.println("Idle Robot");
+        Serial.println("Type stop to stop robot");
+        realTimeRunStop = true;     //run loop continually
+      }
+      else if (command == "manual") { //Move robot to Operator commanded position
+        manualArbiter();
+        realTimeRunStop = false;     // exit loop after running once
+      }
+      else if (command == "wallfollow") { 
+        // Add wallfollow code
+        Serial.println("Type stop to stop robot");
+        realTimeRunStop = true;     //run loop continually
+      }
+      else if (command == "fig8") { 
+        // Add fig8 code
+        Serial.println("Type stop to stop robot");
+        realTimeRunStop = true;     //run loop continually
+      }
+      else if (command == "fig8dock") { 
+        // Add fig8dock code
+        Serial.println("Type stop to stop robot");
+        realTimeRunStop = true;     //run loop continually
+      }
+      else if (command == "hunt") { 
+        // Add hunt code
         Serial.println("Type stop to stop robot");
         realTimeRunStop = true;     //run loop continually
       }
@@ -180,15 +215,18 @@ void loop() {
 
       // ACT-act---act---act---act---act---act---act---act---act---act---act---act---act---act------------
 
-
+      Serial.println(cycleTime);
       // Check to see if all code ran successfully in one real-time increment
       cycleTime = millis() - newLoopTime;   // calculate loop execution time
       if ( cycleTime > controlLoopInterval) {
-        Serial.println("******************************************");
-        Serial.println("error - real time has failed, stop robot!"); // loop took too long to run
-        Serial.print(" 1000 ms real-time loop took = ");
+        Serial.println(F("******************************************"));
+        Serial.println(F("error - real time has failed, stop robot!")); // loop took too long to run
+        Serial.print(F(" 1000 ms real-time loop took = "));
         Serial.println(cycleTime);                                   // print loop time
-        Serial.println("******************************************");
+        Serial.println(F("******************************************"));
+        setspeed = 0;
+        setdirection = 0;
+        moveboat();
         break;          // break out of real-time inner loop
       }
     } // end of "if (newLoopTime - oldLoopTime >= controlLoopInterval)" real-time loop structure
@@ -224,24 +262,22 @@ void loop() {
 
 // OCU functions ocu---ocu---ocu---ocu---ocu---ocu---ocu---ocu---ocu---ocu---ocu---ocu---ocu------------
 
-String getOperatorInput() {
-  // This function prints operator command options on the serial console and prompts
-  // operator to input desired robot command
-  // Serial.println(" ");
-  Serial.println("======================================================================================");
-  Serial.println("| Robot Behavior-Commands: move(moves robot), stop(e-stops motors), idle(robot idles)|");
-  Serial.println("|                                                                                    |");
-  //Serial.println("====================================================================================");
-  Serial.println("| Please type desired robot behavior in command line at top of this window           |");
-  Serial.println("| and then press SEND button.                                                        |");
-  Serial.println("======================================================================================");
-  while (Serial.available() == 0) {}; // do nothing until operator input typed
+// This function prints operator command options on the serial console and prompts
+// operator to input desired robot command
+String getOperatorInput()
+{
+  Serial.println(F("======================================================================================"));
+  Serial.println(F("|Robot Behavior-Commands: stop | idle | manual | wallfollow | fig8 | fig8dock | hunt |"));
+  Serial.println(F("|                                                                                    |"));
+  Serial.println(F("| Please type desired robot behavior in command line and press enter.                |"));
+  Serial.println(F("======================================================================================"));
+  while (Serial.available()==0) {};   // do nothing until operator input typed
   command = Serial.readString();      // read command string
   //command.trim();
-  Serial.print("| New robot behavior command is: ");    // give command feedback to operator
+  Serial.print(F("| New robot behavior command is: "));    // give command feedback to operator
   Serial.println(command);
-  Serial.println("| Type 'stop' to stop control loop and wait for new command                          |");
-  Serial.println("======================================================================================");
+  Serial.println(F("| Type 'stop' to stop control loop and wait for new command                          |"));
+  Serial.println(F("======================================================================================"));
   return command;
 }
 
@@ -290,8 +326,8 @@ void readIR() {
   IRarray[4] = IR5.getDistance();
   IRarray[5] = IR6.getDistance();
 }
-// Sonar function
 
+// Sonar functions
 float mapSonar(float reading)
 {
   return 0.0 + (reading - 0.0) * (18.0 - 0.0) / (19.0 - 0.0);
@@ -357,11 +393,97 @@ void readSonar() {
 
 // THINK functions think---think---think---think---think---think---think---think---think---
 
-// Think function
+// Manual arbiter
+// Receives characters from serial to manually navigate the boat by adjusting rudder(in deg) 
+// and propellor settings (in % speed). 
+// 'wasd' for standard front-left-back-right, 'qe' for slight left-right,
+// 'zc' for extreme left-right. 'o' to idle, 'x' to exit manual mode
+void manualArbiter(){
+  Serial.println(F("Entered manual mode. Type 's' to exit mode"));
+  char inbit;
+  bool keepManual = true;
+  int steptime = 10;
+  while(keepManual)
+  {
+    if(Serial.available())
+    {
+      inbit = Serial.read();
+      switch(inbit)
+      {
+        case 'w':
+          setspeed = 30;
+          setdirection = 0;
+          break;
+        case 's':
+          setspeed = -20;
+          setdirection = 0;
+          break;
+        case 'q':
+          setspeed = 30;
+          setdirection = -20;
+          break;
+        case 'e':
+          setspeed = 30;
+          setdirection = 20;
+          break;
+        case 'a':
+          setspeed = 30;
+          setdirection = -40;
+          break;
+        case 'd':
+          setspeed = 30;
+          setdirection = 40;
+          break;
+        case 'z':
+          setspeed = 30;
+          setdirection = -60;
+          break;
+        case 'c':
+          setspeed = 30;
+          setdirection = 60;
+          break;
+        case 'x':
+          setspeed = 0;
+          setdirection = 0;
+          keepManual = false;
+          break;
+        case 'o':
+          setspeed = 0;
+          setdirection = 0;
+          break;
+        default:
+          Serial.println("Wrong input! Terminating manual mode");
+          keepManual = false;
+          break;  
+      }//close switch
+    moveboat();
+    delay(steptime);
+    //setspeed = 0;
+    //setdirection = 0;
+    //moveboat();
+    }//close if Serial.available 
+  }//close while keepManual
+}//close manualArbiter
+
 
 // ACT functions act---act---act---act---act---act---act---act---act---act---act---act---act---
 
-// Move function
+void centerServos()
+{
+  bool needtocenter = true;
+  char inbit[4];
+  while(needtocenter)
+  {
+    
+  }
+}
+// moveboat function
+//Note: Needs calibration of the center. currently rudder center = 85, prop center = 1400 
+void moveboat()
+{
+  rudder.write(map(setdirection,-90,90,-5,175));
+  propellor.writeMicroseconds(map(setspeed,-100,100,900,1900));
+}
 
 // END of Functions
 //=============================================================================
