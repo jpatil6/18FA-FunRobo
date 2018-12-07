@@ -34,7 +34,6 @@
 #include <Servo.h>        // ServoMotors library
 #include <Pixy2.h>        // Pixy Library
 #include <SPI.h>          //
-#include <SharpIR.h>      // IR sensors library
 #include <TugNeoPixel.h>  // NeoPixel Ring library
 
 //========================================================================================
@@ -63,26 +62,31 @@ Pixy2 pixy;
 int objectArray[17];
 
 int sensorThreshhold = 5;
+const int sonar1 = A3;  //sets signal pin for first sonar sensor
+const int sonar2 = A4;  //sets signal pin for second sonar sensor
+const int sonar3 = A5;  //sets signal pin for third sonar sensor
+int trigger = 12;  //sets 1 trigger pin for all 3 sensors
+int sonarArray[6] = {};
 
-const int sonar1 = A8;  //sets signal pin for first sonar sensor
-const int sonar2 = A9;  //sets signal pin for second sonar sensor
-const int sonar3 = A10;  //sets signal pin for third sonar sensor
-int trigger = 13;  //sets 1 trigger pin for all 3 sensors
-int sonarArray[] = {0,0,0,0,0,0};
-
-SharpIR IR1(SharpIR::GP2Y0A02YK0F, A2);
-SharpIR IR2(SharpIR::GP2Y0A02YK0F, A3);
-SharpIR IR3(SharpIR::GP2Y0A02YK0F, A4);
-SharpIR IR4(SharpIR::GP2Y0A02YK0F, A5);
-SharpIR IR5(SharpIR::GP2Y0A02YK0F, A6);
-SharpIR IR6(SharpIR::GP2Y0A02YK0F, A7);
-int IRarray[6] = {0, 0, 0, 0, 0, 0};
+//SharpIR IR1(SharpIR::GP2Y0A02YK0F, A8);
+//SharpIR IR2(SharpIR::GP2Y0A02YK0F, A9);
+//SharpIR IR3(SharpIR::GP2Y0A02YK0F, A10);
+//SharpIR IR4(SharpIR::GP2Y0A02YK0F, A11);
+//SharpIR IR5(SharpIR::GP2Y0A02YK0F, A12);
+//SharpIR IR6(SharpIR::GP2Y0A02YK0F, A13);
+const int IR1 = A8;
+const int IR1 = A9;
+const int IR1 = A10;
+const int IR1 = A11;
+const int IR1 = A12;
+const int IR1 = A13;
+int IRarray[6] = {};
 
 //Think variables
 
 //Move variables
 const int rudderPin = 7;
-const int propellorPin = 5;
+const int propellorPin = 6;
 Servo rudder;
 Servo propellor;
 int setspeed;
@@ -339,20 +343,28 @@ void findTarget()
 // IR function
 void readIR() {
   /* Uses the getDistance function from SharpIR library to get distances in cm*/
-  IRarray[0] = IR1.getDistance();
-  IRarray[1] = IR2.getDistance();
-  IRarray[2] = IR3.getDistance();
-  IRarray[3] = IR4.getDistance();
-  IRarray[4] = IR5.getDistance();
-  IRarray[5] = IR6.getDistance();
+  IRarray[0] = averageOut(IR1);
+  IRarray[1] = averageOut(IR2);
+  IRarray[2] = averageOut(IR3);
+  IRarray[3] = averageOut(IR4);
+  IRarray[4] = averageOut(IR5);
+  IRarray[5] = averageOut(IR6);
 }
 
-
-// Sonar functions
-float mapSonar(float reading)
-{
-  return (0.0 + (reading - 0.0) * (18.0 - 0.0) / (19.0 - 0.0))*2.54;
+int averageOut( uint8_t pin) {
+  /* Averages out the IR reading to get a more accurate value */
 }
+  int distance = 0;
+  int i = 1;
+  while (i<IRreadingCount){
+  //int distance = sensor.getDistance(); //Calculate the distance in centimeters and store the value in a variable
+    distance += int(pow(analogRead(pin),-1.02)*13755);  // empirically determined equation to calculate the distance in cm
+    i ++;
+  }
+  distance = int(distance/(i-1));
+  return distance;
+}
+
 
 void readSonar() {
   /*
