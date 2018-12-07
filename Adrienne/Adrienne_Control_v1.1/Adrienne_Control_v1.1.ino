@@ -64,9 +64,9 @@ int objectArray[18];
 
 int sensorThreshhold = 5;
 
-const int sonar1 = A8;  //sets signal pin for first sonar sensor
-const int sonar2 = A9;  //sets signal pin for second sonar sensor
-const int sonar3 = A10;  //sets signal pin for third sonar sensor
+const int sonar1 = 8;  //sets signal pin for first sonar sensor
+const int sonar2 = 9;  //sets signal pin for second sonar sensor
+const int sonar3 = 10;  //sets signal pin for third sonar sensor
 int trigger = 13;  //sets 1 trigger pin for all 3 sensors
 int sonarArray[] = {0, 0, 0, 0, 0, 0};
 
@@ -301,7 +301,7 @@ void findObjects()
     objectWidth = 1;
     objectSize = map(IRarray[reading],20,120,50,10);
     int objectArrayTemp[18];
-    for (int entry = 0; entry <= sizeof(objectArray); i++) // then make a gaussian function with those values
+    for (int entry = 0; entry <= sizeof(objectArray); entry++) // then make a gaussian function with those values
       {
         objectArrayTemp[entry] = objectSize*exp((entry-objectPos)^2/(2*objectWidth^2));
         // then we populate target array with the values of the gaussian function from 0 to 17
@@ -392,7 +392,7 @@ void votingFunc()
   voteArray = targetArray + objectArray;
   int maximum = 0;
   int maximumIndex = voteArray[18];
-  for (int entry = 0; i = 18; i++)
+  for (int entry = 0; i = 18; entry++)
   {
     if (voteArray[entry] > maximum)
   {
