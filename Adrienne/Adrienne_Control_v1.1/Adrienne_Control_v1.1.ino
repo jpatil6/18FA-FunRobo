@@ -409,7 +409,7 @@ void readSonar()
 
 // Set Heading. Creates a function that tells the robot where to go directly and puts it in targetArray
 
-void setHeading(heading)
+void setHeading(int heading)
 {
   for (int entry = 0; entry <= 18; entry++) // then make a gaussian function with those values
     {
