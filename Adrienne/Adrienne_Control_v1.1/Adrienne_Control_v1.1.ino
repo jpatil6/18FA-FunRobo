@@ -170,7 +170,7 @@ void loop() {
 
       //SENSE-sense---sense---sense---sense---sense---sense---sense---sense---sense---sense---sense-------
 
-      // TODO add sensor code here
+      findObjects();
 
       // THINK think---think---think---think---think---think---think---think---think---think---think---------
       // pick robot behavior based on operator input command typed at console
@@ -192,6 +192,7 @@ void loop() {
       else if (command == "wall follow") {
         // Add wallfollow code
         Serial.println("Type stop to stop robot");
+        
         realTimeRunStop = true;     //run loop continually
       }
       else if (command == "figure 8") {
@@ -306,7 +307,7 @@ void findObjects()
     objectWidth = 1;
     objectSize = map(IRarray[reading], 20, 120, 50, 10);
     int objectArrayTemp[18];
-    for (int entry = 0; entry <= sizeof(objectArray); entry++) // then make a gaussian function with those values
+    for (int entry = 0; entry <= 18; entry++) // then make a gaussian function with those values
     {
       objectArrayTemp[entry] = objectSize * exp((entry - objectPos) ^ 2 / (2 * objectWidth ^ 2));
       // then we populate target array with the values of the gaussian function from 0 to 17
@@ -341,7 +342,7 @@ void findPixyTarget()
         targetWidth = map(pixy.ccc.blocks[i].m_width, 1, 316, 1, 3); // and how much of our field of view it takes
         targetSize = map(pixy.ccc.blocks[i].m_height, 1, 208, 50, 100); // and how close it is, based on height
 
-        for (int entry = 0; entry <= sizeof(targetArray); i++) // then make a gaussian function with those values
+        for (int entry = 0; entry <= 18; entry++) // then make a gaussian function with those values
         {
           targetArray[entry] = targetSize * exp((entry - targetPos) ^ 2 / (2 * targetWidth ^ 2));
           // then we populate target array with the values of the gaussian function from 0 to 17
@@ -405,6 +406,17 @@ void readSonar()
 
 
 // THINK functions think---think---think---think---think---think---think---think---think---
+
+// Set Heading. Creates a function that tells the robot where to go directly and puts it in targetArray
+
+void setHeading(heading)
+{
+  for (int entry = 0; entry <= 18; entry++) // then make a gaussian function with those values
+    {
+      targetArray[entry] = 100 * exp((entry - heading) ^ 2 / (16));
+      // then we populate target array with the values of the gaussian function from 0 to 18
+    }
+}
 
 // Voting Function
 // Takes the gaussian functions from find object and find target and outputs an angle
