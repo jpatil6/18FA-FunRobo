@@ -51,6 +51,7 @@ const long controlLoopInterval = 1000; //create a name for control loop cycle ti
 // OCU and communication variables
 
 TugNeoPixel neo = TugNeoPixel(8, 16);  //initialize NeoPixel object
+int wallFollowCounter= 0;
 
 //Pixy variables
 
@@ -75,7 +76,7 @@ const int IR3 = 10;
 const int IR4 = 11;
 const int IR5 = 12;
 const int IR6 = 13;
-int IRarray[5] = {};
+int IRarray[5];
 void readIR();
 int IRreadingCount = 20;
 
@@ -189,9 +190,40 @@ void loop() {
         manualArbiter();
         realTimeRunStop = false;     // exit loop after running once
       }
-      else if (command == "wall follow") {
-        // Add wallfollow code
-        Serial.println("Type stop to stop robot");
+      else if (command == "wallfollow"){
+        if (wallFollowCounter = 0){
+          findObjects();
+          setHeading(9);
+          if( sonarArray[1] <= 390){
+          wallFollowCounter++;
+          }
+        }
+        if (wallFollowCounter = 1){
+          findObjects();
+          swerve(0);     //need to set side
+          if( IRarray[3] <= 90 || IRarray [4] <= 90){
+            wallFollowCounter++;
+          }
+        }
+        if (wallFollowCounter = 2){
+          findObjects();
+          keepDistance(60, 0)     //need to set side
+          if ( sonarArray[1] <= 120){
+            wallFollowCounter++;;
+          }
+        }
+        if (wallFollowCounter = 3){
+          findObjects();
+          setHeading(18);
+          if ( sonarArray[1] >= 120){
+            wallFollowCounter++;;
+          }
+        }
+        if (wallFollowCounter = 4){
+          findObjects();
+          realTimeRunStop = false;    //exit real time control loop
+          break;
+        }
         
         realTimeRunStop = true;     //run loop continually
       }
