@@ -55,12 +55,12 @@ TugNeoPixel neo = TugNeoPixel(8, 16);  //initialize NeoPixel object
 
 //Pixy variables
 
-int targetArray[18];
+int targetArray[19];
 Pixy2 pixy;
 
 //Sonar and IR variables
 
-int objectArray[18];
+int objectArray[19];
 
 const int sonar1 = A3;  //sets signal pin for first sonar sensor
 const int sonar2 = A4;  //sets signal pin for second sonar sensor
@@ -80,7 +80,7 @@ int IRarray[6] = {0, 0, 0, 0, 0, 0};
 
 //Move variables
 const int rudderPin = 7;
-const int propellorPin = 5;
+const int propellorPin = 6;
 Servo rudder;
 Servo propellor;
 int setspeed;
