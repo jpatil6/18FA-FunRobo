@@ -200,14 +200,14 @@ void loop() {
         }
         if (wallFollowCounter = 1){
           findObjects();
-          swerve(0);     //need to set side
+          swerveAroundIceberg(0);     //need to set side
           if( IRarray[3] <= 90 || IRarray [4] <= 90){
             wallFollowCounter++;
           }
         }
         if (wallFollowCounter = 2){
           findObjects();
-          keepDistance(60, 0)     //need to set side
+          maintainDistance(60, 0);     //need to set side
           if ( sonarArray[1] <= 120){
             wallFollowCounter++;;
           }
@@ -450,6 +450,10 @@ void setHeading(int heading)
     }
 }
 
+void swerveAroundIceberg(int side){
+  setHeading(1);
+}
+
 // Voting Function
 // Takes the gaussian functions from find object and find target and outputs an angle
 // and a distance to the point we want to go to.
@@ -551,15 +555,7 @@ void manualArbiter()
 
 // ACT functions act---act---act---act---act---act---act---act---act---act---act---act---act---
 
-void centerServos()
-{
-  bool needtocenter = true;
-  char inbit[4];
-  while (needtocenter)
-  {
 
-  }
-}
 // moveboat function
 //Note: Needs calibration of the center. currently rudder center = 85, prop center = 1400
 void moveboat()
