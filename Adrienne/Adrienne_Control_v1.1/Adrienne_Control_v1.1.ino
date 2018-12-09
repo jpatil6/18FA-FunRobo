@@ -5,14 +5,14 @@
    based on direct text commands from a human operator.
 <<<<<<< HEAD
  * Robot Name: Adrienne
- * What does code do: poll open, 
-   sense: Detect range and bearing of target and obstacles with the Pixycam and IR sensors 
-   think: Combine bearing arrays for target and obstacles to optimize bearing of the tugboat. 
+ * What does code do: poll open,
+   sense: Detect range and bearing of target and obstacles with the Pixycam and IR sensors
+   think: Combine bearing arrays for target and obstacles to optimize bearing of the tugboat.
           If unobstructed on set bearing, calculate propellor speed proportional to range
    act:   Set table motor and rudder bearing, set propellor speed
    carry out operator text input, loop indefinitely
  * Hardware warnings: Do not wire the Pixycam ICSP arduino I/O pin the wrong way around.
- * XBEE:1. Set shield SerialSelect switch to SW_SER for uploading code. 
+ * XBEE:1. Set shield SerialSelect switch to SW_SER for uploading code.
 =======
    Robot Name: Adrienne
    What does code do: poll open,
@@ -33,11 +33,11 @@
 //
 // TODO:
 //      OCU/COMM- Upon 'stop', set rudder and prop to 0 before terminating loop
-//              - Add NeoPixel states and code     
+//              - Add NeoPixel states and code
 //      SENSE:  - Pending combination of IR+Sonar into objectArray
 //              - Pending findTarget function (also include Dock as target)
 //      THINK:  - Pending Dead Reckoning + BumbleBee arbiter + find center function
-//              - Create Mission Definiton file and structure 
+//              - Create Mission Definiton file and structure
 //      ACT:    - Pending moveboat() function
 
 //========================================================================================
@@ -63,17 +63,26 @@ const long controlLoopInterval = 1000; //create a name for control loop cycle ti
 // OCU and communication variables
 
 TugNeoPixel neo = TugNeoPixel(8, 16);  //initialize NeoPixel object
+int wallFollowCounter = 0;
 
 //Pixy variables
 
+<<<<<<< HEAD
 int targetArray[17];
+=======
+int targetArray[19];
+>>>>>>> Eamonbranch
 Pixy2 pixy;
 
 //Sonar and IR variables
 
+<<<<<<< HEAD
 int objectArray[17];
+=======
+int objectArray[19];
+>>>>>>> Eamonbranch
 
-int sensorThreshhold = 5;
+int sensorThreshhold = 20;
 const int sonar1 = A3;  //sets signal pin for first sonar sensor
 const int sonar2 = A4;  //sets signal pin for second sonar sensor
 const int sonar3 = A5;  //sets signal pin for third sonar sensor
@@ -98,12 +107,16 @@ const int IR4 = 11;
 const int IR5 = 12;
 const int IR6 = 13;
 <<<<<<< HEAD
+<<<<<<< HEAD
 int IRarray[6] = {};
 
 //Think variables
 
 =======
 int IRarray[5] = {};
+=======
+int IRarray[6];
+>>>>>>> Eamonbranch
 void readIR();
 int IRreadingCount = 20;
 
@@ -131,7 +144,7 @@ int setdirection;
 //=========================================================================================
 <<<<<<< HEAD
 void setup() {      // Step 1)Put your robot setup code here, to run once:
-  
+
 =======
 void setup()
 { // Step 1)Put your robot setup code here, to run once:
@@ -187,6 +200,9 @@ void loop() {
     // Check if operator inputs a command during real-time loop eecution
     if (Serial.available() > 0) {     // check to see if operator typed at OCU
       realTimeRunStop = false;      // if OCU input typed, stop control loop
+      setspeed = 0;
+      setdirection = 0;
+      moveboat();
       command = Serial.readString();      // read command string to clear buffer
       //Serial.println("command 2 is "+command);
       break;      // break out of real-time loop
@@ -204,7 +220,6 @@ void loop() {
 
       //SENSE-sense---sense---sense---sense---sense---sense---sense---sense---sense---sense---sense-------
 
-      // TODO add sensor code here
 
       // THINK think---think---think---think---think---think---think---think---think---think---think---------
       // pick robot behavior based on operator input command typed at console
@@ -223,22 +238,66 @@ void loop() {
         manualArbiter();
         realTimeRunStop = false;     // exit loop after running once
       }
-      else if (command == "wallfollow") { 
+<<<<<<< HEAD
+      else if (command == "wallfollow") {
         // Add wallfollow code
         Serial.println("Type stop to stop robot");
+=======
+      else if (command == "wallfollow") {
+        Serial.println("In wallfollow");
+        if (wallFollowCounter == 0) {
+          Serial.println("In wallfollow state 0");
+          findObjects();
+          setHeading(9);
+          if ( sonarArray[3] <= 310) {
+            wallFollowCounter++;
+          }
+        }
+        if (wallFollowCounter == 1) {
+          Serial.println("In wallfollow state 1");
+          findObjects();
+          swerveAroundIceberg(0);     //need to set side
+          if ( IRarray[2] <= 90 || IRarray [3] <= 90) {
+            wallFollowCounter++;
+          }
+        }
+        if (wallFollowCounter == 2) {
+          Serial.println("In wallfollow state 2");
+          findObjects();
+          maintainDistance(60, 0);     //need to set side
+          if ( sonarArray[3] <= 120) {
+            wallFollowCounter++;
+          }
+        }
+        if (wallFollowCounter == 3) {
+          Serial.println("In wallfollow state 3");
+          findObjects();
+          setHeading(13);
+          if ( sonarArray[3] >= 120) {
+            wallFollowCounter++;
+          }
+        }
+        if (wallFollowCounter == 4) {
+          Serial.println("In wallfollow state 4");
+          findObjects();
+          realTimeRunStop = false;    //exit real time control loop
+        }
+        votingFunc();
+        moveboat();
+>>>>>>> Eamonbranch
         realTimeRunStop = true;     //run loop continually
       }
-      else if (command == "fig8") { 
+      else if (command == "fig8") {
         // Add fig8 code
         Serial.println("Type stop to stop robot");
         realTimeRunStop = true;     //run loop continually
       }
-      else if (command == "fig8dock") { 
+      else if (command == "fig8dock") {
         // Add fig8dock code
         Serial.println("Type stop to stop robot");
         realTimeRunStop = true;     //run loop continually
       }
-      else if (command == "hunt") { 
+      else if (command == "hunt") {
         // Add hunt code
         Serial.println("Type stop to stop robot");
         realTimeRunStop = true;     //run loop continually
@@ -251,7 +310,7 @@ void loop() {
 
       // ACT-act---act---act---act---act---act---act---act---act---act---act---act---act---act------------
 
-      Serial.println(cycleTime);
+      // Serial.println(cycleTime);
       // Check to see if all code ran successfully in one real-time increment
       cycleTime = millis() - newLoopTime;   // calculate loop execution time
       if ( cycleTime > controlLoopInterval) {
@@ -321,23 +380,38 @@ String getOperatorInput()
 
 void findObjects()
 {
+<<<<<<< HEAD
   targetArray = {50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50};
   readIR();
   readSonar();
 <<<<<<< HEAD
-  
+
   for(int reading = 0; reading >= 5; reading++)
-  { 
+  {
 =======
   for (int reading = 0; reading >= 5; reading++)
+=======
+  for (int entry = 0; entry < 19; entry++)
+  {
+    targetArray[entry] = 50;
+  }
+  readIR();
+  readSonar();
+  for (int reading = 0; reading < 6; reading++)
+>>>>>>> Eamonbranch
   {
 >>>>>>> Eamonbranch
     int objectPos; //b in the gaussian function
     int objectWidth; //c in the gaussian functions, the std deviatiation
     int objectSize; // a in the gaussian function
-    if (abs(IRarray[reading] - sonarArray[reading]) > sensorThreshhold)
+
+
+    if ((IRarray[reading] < 0))
     {
       IRarray[reading] = 0;
+    } else if (IRarray[reading] > 120)
+    {
+      IRarray[reading] = 120;
     }
     objectPos = map(reading, 0, 5, 0, 18); // needs to be rounded
     objectWidth = 1;
@@ -352,17 +426,34 @@ void findObjects()
     objectArray -= objectArrayTemp;
 =======
     objectSize = map(IRarray[reading], 20, 120, 50, 10);
-    int objectArrayTemp[18];
-    for (int entry = 0; entry <= sizeof(objectArray); entry++) // then make a gaussian function with those values
+    int objectArrayTemp[19];
+    for (int entry = 0; entry < 19; entry++) // then make a gaussian function with those values
     {
-      objectArrayTemp[entry] = objectSize * exp((entry - objectPos) ^ 2 / (2 * objectWidth ^ 2));
+      objectArrayTemp[entry] = objectSize * pow(2.718,-1*(pow((entry - objectPos),2)/(2 * pow(objectWidth,2))));
       // then we populate target array with the values of the gaussian function from 0 to 17
     }
-    for (int entry = 0; entry = 18; entry++)
+    for (int entry = 0; entry < 19; entry++)
     {
       objectArray[entry] = objectArray[entry] - objectArrayTemp[entry];
     }
   }
+<<<<<<< HEAD
+>>>>>>> Eamonbranch
+=======
+  Serial.print("IRarray: ");
+  for (int i = 0; i < 6; i++)
+  {
+    Serial.print(IRarray[i]);
+    Serial.print("\t");
+  }
+  Serial.println();
+  Serial.print("Sonararray: ");
+  for (int i = 0; i < 6; i++)
+  {
+    Serial.print(sonarArray[i]);
+    Serial.print("\t");
+  }
+  Serial.println();
 >>>>>>> Eamonbranch
 }
 
@@ -393,16 +484,20 @@ void findTarget()
         targetPos = map(pixy.ccc.blocks[i].m_x, 0, 316, 0, 18); //we find where it is
         targetWidth = map(pixy.ccc.blocks[i].m_width,1,316,1,3); // and how much of our field of view it takes
         targetSize = map(pixy.ccc.blocks[i].m_height,1,208,50,100); // and how close it is, based on height
-        
+
 =======
         targetPos = map(pixy.ccc.blocks[i].m_x, 0, 316, 6, 12); //we find where it is
         targetWidth = map(pixy.ccc.blocks[i].m_width, 1, 316, 1, 3); // and how much of our field of view it takes
         targetSize = map(pixy.ccc.blocks[i].m_height, 1, 208, 50, 100); // and how close it is, based on height
 
+<<<<<<< HEAD
 >>>>>>> Eamonbranch
         for (int entry = 0; entry <= sizeof(targetArray); i++) // then make a gaussian function with those values
+=======
+        for (int entry = 0; entry <= 18; entry++) // then make a gaussian function with those values
+>>>>>>> Eamonbranch
         {
-          targetArray[entry] = targetSize * exp((entry - targetPos) ^ 2 / (2 * targetWidth ^ 2));
+          targetArray[entry] = targetSize * pow(2.718,-1*(pow((entry - targetPos),2)/(2 * pow(targetWidth,2))));
           // then we populate target array with the values of the gaussian function from 0 to 17
         }
         break;
@@ -448,14 +543,13 @@ void readSonar() {
   delay(1); //triggers the sonars/makes them take a reading
   digitalWrite(trigger, LOW);
 
-<<<<<<< HEAD
-  float reading1 = mapSonar(analogRead(sonar1) / 2.0);
-  float reading2 = mapSonar(analogRead(sonar2) / 2.0);
-  float reading3 = mapSonar(analogRead(sonar3) / 2.0);
-=======
   float reading1 = analogRead((sonar1) / 2.0);
   float reading2 = analogRead((sonar2) / 2.0);
   float reading3 = analogRead((sonar3) / 2.0);
+=======
+  float reading1 = analogRead(sonar1) / 2.0;
+  float reading2 = analogRead(sonar2) / 2.0;
+  float reading3 = analogRead(sonar3) / 2.0;
 >>>>>>> Eamonbranch
 
   sonarArray[0] = reading1;
@@ -469,15 +563,53 @@ void readSonar() {
 
 // THINK functions think---think---think---think---think---think---think---think---think---
 
-<<<<<<< HEAD
 =======
+// Set Heading. Creates a function that tells the robot where to go directly and puts it in targetArray
+
+void setHeading(int heading)
+{
+  for (int entry = 0; entry <= 18; entry++) // then make a gaussian function with those values
+  {
+    targetArray[entry] = 100 * exp((entry - heading) ^ 2 / (16));
+    // then we populate target array with the values of the gaussian function from 0 to 18
+  }
+}
+
+void swerveAroundIceberg(int side) {
+  setHeading(1);
+}
+
+//maintainDistance
+void maintainDistance(int dist, int side)
+{
+  if (side == 0) {
+    if (objectArray[0] < 0.9 * dist)
+    {
+      setHeading(11);
+    } else if (objectArray[0] > 1.1 * dist) {
+      setHeading(7);
+    }
+  } else if (side == 1) {
+    if (objectArray[18] < 0.9 * dist)
+    {
+      setHeading(11);
+    } else if (objectArray[18] > 1.1 * dist) {
+      setHeading(7);
+    }
+  }
+  else{
+    setHeading(4);
+  }
+
+}
+
 // Voting Function
 // Takes the gaussian functions from find object and find target and outputs an angle
 // and a distance to the point we want to go to.
 void votingFunc()
 {
   int voteArray[19];
-  for (int entry = 0;entry <= 18; entry++)
+  for (int entry = 0; entry <= 18; entry++)
   {
     voteArray[entry] = targetArray[entry] + objectArray[entry];
   }
@@ -493,13 +625,13 @@ void votingFunc()
   }
   theta = maximum * 10; // so that we're giving the boat an angle.
   magnitude = voteArray[maximum]; // A number from 0 to 150. It gets bigger as the target gets farther away
-
+  pickBumblebeeCircle(magnitude, theta);
 }
 
 >>>>>>> Eamonbranch
 // Manual arbiter
-// Receives characters from serial to manually navigate the boat by adjusting rudder(in deg) 
-// and propellor settings (in % speed). 
+// Receives characters from serial to manually navigate the boat by adjusting rudder(in deg)
+// and propellor settings (in % speed).
 // 'wasd' for standard front-left-back-right, 'qe' for slight left-right,
 // 'zc' for extreme left-right. 'o' to idle, 'x' to exit manual mode
 void manualArbiter(){
@@ -558,40 +690,77 @@ void manualArbiter(){
         default:
           Serial.println("Wrong input! Terminating manual mode");
           keepManual = false;
-          break;  
+          break;
       }//close switch
-<<<<<<< HEAD
-    moveboat();
-    delay(steptime);
-    //setspeed = 0;
-    //setdirection = 0;
-    //moveboat();
-    }//close if Serial.available 
-=======
       moveboat();
       delay(steptime);
       //setspeed = 0;
       //setdirection = 0;
       //moveboat();
     }//close if Serial.available
->>>>>>> Eamonbranch
   }//close while keepManual
 }//close manualArbiter
 
 
 // ACT functions act---act---act---act---act---act---act---act---act---act---act---act---act---
-
-void centerServos()
+// pickBumblebeeCircle
+// this function accepts a radius and theta to select the rudder and propellor settings
+//incoming r ranges from 0 to 150, theta goes from 0 to 180 degress
+void pickBumblebeeCircle(int r, double theta)
 {
-  bool needtocenter = true;
-  char inbit[4];
-  while (needtocenter)
+
+  r = r * 120 / 150;
+  theta = (180 - theta) * PI / 180;
+  //Serial.print("r: ");
+  //Serial.println(r);
+  //Serial.print("theta: ");
+  //Serial.println(theta);
+
+  double zone[] = { -60, -191.5, -347.5, -914, 916, 333.5, 168.5, 60};
+  int turningmaxspeed[] = {30, 45, 60, 75, 60, 45, 30};
+  int turninglookup[] = { -45, -30, -15, 0, 15, 30, 45};
+  int i;
+  boolean valid = false;
+
+
+  for (i = 0; i < 7; i++)
   {
-    
+    if (i == 3) {
+      if ((r > zone[i]*cos(theta)) && (r > zone[i + 1]*cos(theta)))
+      {
+        //Serial.print("In zone: ");
+        //Serial.println(i+1);
+        valid = true;
+        break;
+      }
+    } else {
+      if ((r > zone[i]*cos(theta)) && (r < zone[i + 1]*cos(theta)))
+      {
+        //Serial.print("In zone: ");
+        //Serial.println(i+1);
+        valid = true;
+        break;
+      } else if ((r < zone[i]*cos(theta)) && (r > zone[i + 1]*cos(theta))) {
+        //Serial.print("In zone: ");
+        //Serial.println(i+1);
+        valid = true;
+        break;
+      }//end inner if
+    }//end outer if
+  }//end for
+  if (valid)
+  {
+    setdirection = turninglookup[i];
+    setspeed = (turningmaxspeed[i] * r / 120);
+  } else {
+    setspeed = 0;
+    setdirection = 0;
   }
 }
+
+
 // moveboat function
-//Note: Needs calibration of the center. currently rudder center = 85, prop center = 1400 
+//Note: Needs calibration of the center. currently rudder center = 85, prop center = 1400
 void moveboat()
 {
   rudder.write(map(setdirection, -90, 90, -5, 175));
