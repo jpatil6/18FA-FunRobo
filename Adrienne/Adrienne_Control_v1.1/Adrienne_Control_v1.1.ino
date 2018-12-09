@@ -51,18 +51,18 @@ const long controlLoopInterval = 1000; //create a name for control loop cycle ti
 // OCU and communication variables
 
 TugNeoPixel neo = TugNeoPixel(8, 16);  //initialize NeoPixel object
-int wallFollowCounter= 0;
+int wallFollowCounter = 0;
 
 //Pixy variables
 
-int targetArray[18];
+int targetArray[19];
 Pixy2 pixy;
 
 //Sonar and IR variables
 
-int objectArray[18];
+int objectArray[19];
 
-int sensorThreshhold = 5;
+int sensorThreshhold = 20;
 const int sonar1 = A3;  //sets signal pin for first sonar sensor
 const int sonar2 = A4;  //sets signal pin for second sonar sensor
 const int sonar3 = A5;  //sets signal pin for third sonar sensor
@@ -76,7 +76,7 @@ const int IR3 = 10;
 const int IR4 = 11;
 const int IR5 = 12;
 const int IR6 = 13;
-int IRarray[5];
+int IRarray[6];
 void readIR();
 int IRreadingCount = 20;
 
@@ -154,6 +154,9 @@ void loop() {
     // Check if operator inputs a command during real-time loop eecution
     if (Serial.available() > 0) {     // check to see if operator typed at OCU
       realTimeRunStop = false;      // if OCU input typed, stop control loop
+      setspeed = 0;
+      setdirection = 0;
+      moveboat();
       command = Serial.readString();      // read command string to clear buffer
       //Serial.println("command 2 is "+command);
       break;      // break out of real-time loop
@@ -171,7 +174,6 @@ void loop() {
 
       //SENSE-sense---sense---sense---sense---sense---sense---sense---sense---sense---sense---sense-------
 
-      findObjects();
 
       // THINK think---think---think---think---think---think---think---think---think---think---think---------
       // pick robot behavior based on operator input command typed at console
@@ -190,42 +192,47 @@ void loop() {
         manualArbiter();
         realTimeRunStop = false;     // exit loop after running once
       }
-      else if (command == "wallfollow"){
-        if (wallFollowCounter = 0){
+      else if (command == "wallfollow") {
+        Serial.println("In wallfollow");
+        if (wallFollowCounter == 0) {
+          Serial.println("In wallfollow state 0");
           findObjects();
           setHeading(9);
-          if( sonarArray[1] <= 390){
-          wallFollowCounter++;
-          }
-        }
-        if (wallFollowCounter = 1){
-          findObjects();
-          swerveAroundIceberg(0);     //need to set side
-          if( IRarray[3] <= 90 || IRarray [4] <= 90){
+          if ( sonarArray[3] <= 310) {
             wallFollowCounter++;
           }
         }
-        if (wallFollowCounter = 2){
+        if (wallFollowCounter == 1) {
+          Serial.println("In wallfollow state 1");
+          findObjects();
+          swerveAroundIceberg(0);     //need to set side
+          if ( IRarray[2] <= 90 || IRarray [3] <= 90) {
+            wallFollowCounter++;
+          }
+        }
+        if (wallFollowCounter == 2) {
+          Serial.println("In wallfollow state 2");
           findObjects();
           maintainDistance(60, 0);     //need to set side
-          if ( sonarArray[1] <= 120){
-            wallFollowCounter++;;
+          if ( sonarArray[3] <= 120) {
+            wallFollowCounter++;
           }
         }
-        if (wallFollowCounter = 3){
+        if (wallFollowCounter == 3) {
+          Serial.println("In wallfollow state 3");
           findObjects();
-          setHeading(18);
-          if ( sonarArray[1] >= 120){
-            wallFollowCounter++;;
+          setHeading(13);
+          if ( sonarArray[3] >= 120) {
+            wallFollowCounter++;
           }
         }
-        if (wallFollowCounter = 4){
+        if (wallFollowCounter == 4) {
+          Serial.println("In wallfollow state 4");
           findObjects();
           realTimeRunStop = false;    //exit real time control loop
-          break;
         }
         votingFunc();
-         moveboat();
+        moveboat();
         realTimeRunStop = true;     //run loop continually
       }
       else if (command == "figure 8") {
@@ -251,7 +258,7 @@ void loop() {
 
       // ACT-act---act---act---act---act---act---act---act---act---act---act---act---act---act------------
 
-      Serial.println(cycleTime);
+      // Serial.println(cycleTime);
       // Check to see if all code ran successfully in one real-time increment
       cycleTime = millis() - newLoopTime;   // calculate loop execution time
       if ( cycleTime > controlLoopInterval) {
@@ -321,35 +328,54 @@ String getOperatorInput()
 
 void findObjects()
 {
-  for (int entry = 0; entry = 18; entry++)
+  for (int entry = 0; entry < 19; entry++)
   {
     targetArray[entry] = 50;
   }
   readIR();
   readSonar();
-  for (int reading = 0; reading >= 5; reading++)
+  for (int reading = 0; reading < 6; reading++)
   {
     int objectPos; //b in the gaussian function
     int objectWidth; //c in the gaussian functions, the std deviatiation
     int objectSize; // a in the gaussian function
-    if (abs(IRarray[reading] - sonarArray[reading]) > sensorThreshhold)
+
+
+    if ((IRarray[reading] < 0))
     {
       IRarray[reading] = 0;
+    } else if (IRarray[reading] > 120)
+    {
+      IRarray[reading] = 120;
     }
     objectPos = map(reading, 0, 5, 0, 18); // needs to be rounded
     objectWidth = 1;
     objectSize = map(IRarray[reading], 20, 120, 50, 10);
-    int objectArrayTemp[18];
-    for (int entry = 0; entry <= 18; entry++) // then make a gaussian function with those values
+    int objectArrayTemp[19];
+    for (int entry = 0; entry < 19; entry++) // then make a gaussian function with those values
     {
-      objectArrayTemp[entry] = objectSize * exp((entry - objectPos) ^ 2 / (2 * objectWidth ^ 2));
+      objectArrayTemp[entry] = objectSize * pow(2.718,-1*(pow((entry - objectPos),2)/(2 * pow(objectWidth,2))));
       // then we populate target array with the values of the gaussian function from 0 to 17
     }
-    for (int entry = 0; entry = 18; entry++)
+    for (int entry = 0; entry < 19; entry++)
     {
       objectArray[entry] = objectArray[entry] - objectArrayTemp[entry];
     }
   }
+  Serial.print("IRarray: ");
+  for (int i = 0; i < 6; i++)
+  {
+    Serial.print(IRarray[i]);
+    Serial.print("\t");
+  }
+  Serial.println();
+  Serial.print("Sonararray: ");
+  for (int i = 0; i < 6; i++)
+  {
+    Serial.print(sonarArray[i]);
+    Serial.print("\t");
+  }
+  Serial.println();
 }
 
 // Pixy function
@@ -377,7 +403,7 @@ void findPixyTarget()
 
         for (int entry = 0; entry <= 18; entry++) // then make a gaussian function with those values
         {
-          targetArray[entry] = targetSize * exp((entry - targetPos) ^ 2 / (2 * targetWidth ^ 2));
+          targetArray[entry] = targetSize * pow(2.718,-1*(pow((entry - targetPos),2)/(2 * pow(targetWidth,2))));
           // then we populate target array with the values of the gaussian function from 0 to 17
         }
         break;
@@ -425,9 +451,9 @@ void readSonar()
   delay(1); //triggers the sonars/makes them take a reading
   digitalWrite(trigger, LOW);
 
-  float reading1 = analogRead((sonar1) / 2.0);
-  float reading2 = analogRead((sonar2) / 2.0);
-  float reading3 = analogRead((sonar3) / 2.0);
+  float reading1 = analogRead(sonar1) / 2.0;
+  float reading2 = analogRead(sonar2) / 2.0;
+  float reading3 = analogRead(sonar3) / 2.0;
 
   sonarArray[0] = reading1;
   sonarArray[1] = reading1;
@@ -445,21 +471,38 @@ void readSonar()
 void setHeading(int heading)
 {
   for (int entry = 0; entry <= 18; entry++) // then make a gaussian function with those values
-    {
-      targetArray[entry] = 100 * exp((entry - heading) ^ 2 / (16));
-      // then we populate target array with the values of the gaussian function from 0 to 18
-    }
+  {
+    targetArray[entry] = 100 * exp((entry - heading) ^ 2 / (16));
+    // then we populate target array with the values of the gaussian function from 0 to 18
+  }
 }
 
-void swerveAroundIceberg(int side){
-  //setHeading(1);
-  if(sonarArray[1] > 100){
-    setHeading(9);
+void swerveAroundIceberg(int side) {
+  setHeading(1);
+}
+
+//maintainDistance
+void maintainDistance(int dist, int side)
+{
+  if (side == 0) {
+    if (objectArray[0] < 0.9 * dist)
+    {
+      setHeading(11);
+    } else if (objectArray[0] > 1.1 * dist) {
+      setHeading(7);
+    }
+  } else if (side == 1) {
+    if (objectArray[18] < 0.9 * dist)
+    {
+      setHeading(11);
+    } else if (objectArray[18] > 1.1 * dist) {
+      setHeading(7);
+    }
   }
   else{
     setHeading(4);
   }
-  
+
 }
 
 // Voting Function
@@ -468,7 +511,7 @@ void swerveAroundIceberg(int side){
 void votingFunc()
 {
   int voteArray[19];
-  for (int entry = 0;entry <= 18; entry++)
+  for (int entry = 0; entry <= 18; entry++)
   {
     voteArray[entry] = targetArray[entry] + objectArray[entry];
   }
@@ -484,7 +527,7 @@ void votingFunc()
   }
   theta = maximum * 10; // so that we're giving the boat an angle.
   magnitude = voteArray[maximum]; // A number from 0 to 150. It gets bigger as the target gets farther away
-  pickBumblebeecircle(magnitude,theta);
+  pickBumblebeeCircle(magnitude, theta);
 }
 
 // Manual arbiter
@@ -567,54 +610,54 @@ void manualArbiter()
 //incoming r ranges from 0 to 150, theta goes from 0 to 180 degress
 void pickBumblebeeCircle(int r, double theta)
 {
-   
-   r = r*120/150;
-   theta = (180-theta)*PI/180;
-   //Serial.print("r: ");
-   //Serial.println(r);
-   //Serial.print("theta: ");
-   //Serial.println(theta);
-   
-   double zone[] = {-60,-191.5,-347.5,-914,916,333.5,168.5,60};
-   int turningmaxspeed[] = {30,45,60,75,60,45,30}; 
-   int turninglookup[] = {-45,-30,-15,0,15,30,45};
-   int i;
-   boolean valid =false;
-   
-   
-   for(i =0; i < 7; i++)
-   {
-      if(i==3){
-        if((r > zone[i]*cos(theta)) && (r > zone[i+1]*cos(theta)))
-        {
-          //Serial.print("In zone: ");
-          //Serial.println(i+1);
-          valid = true;
-          break;
-        }
-      }else{
-        if((r > zone[i]*cos(theta)) && (r < zone[i+1]*cos(theta)))
-        {
-          //Serial.print("In zone: ");
-          //Serial.println(i+1);
-          valid = true;
-          break;
-        }else if((r < zone[i]*cos(theta))&&(r > zone[i+1]*cos(theta))){
-          //Serial.print("In zone: ");
-          //Serial.println(i+1);
-          valid = true;
-          break;
-        }//end inner if
-      }//end outer if
-   }//end for
-   if(valid)
-   {
-      setdirection = turninglookup[i];
-      setspeed = (turningmaxspeed[i]*r/120); 
-   }else{
-      setspeed = 0;
-      setdirection = 0;
-   }
+
+  r = r * 120 / 150;
+  theta = (180 - theta) * PI / 180;
+  //Serial.print("r: ");
+  //Serial.println(r);
+  //Serial.print("theta: ");
+  //Serial.println(theta);
+
+  double zone[] = { -60, -191.5, -347.5, -914, 916, 333.5, 168.5, 60};
+  int turningmaxspeed[] = {30, 45, 60, 75, 60, 45, 30};
+  int turninglookup[] = { -45, -30, -15, 0, 15, 30, 45};
+  int i;
+  boolean valid = false;
+
+
+  for (i = 0; i < 7; i++)
+  {
+    if (i == 3) {
+      if ((r > zone[i]*cos(theta)) && (r > zone[i + 1]*cos(theta)))
+      {
+        //Serial.print("In zone: ");
+        //Serial.println(i+1);
+        valid = true;
+        break;
+      }
+    } else {
+      if ((r > zone[i]*cos(theta)) && (r < zone[i + 1]*cos(theta)))
+      {
+        //Serial.print("In zone: ");
+        //Serial.println(i+1);
+        valid = true;
+        break;
+      } else if ((r < zone[i]*cos(theta)) && (r > zone[i + 1]*cos(theta))) {
+        //Serial.print("In zone: ");
+        //Serial.println(i+1);
+        valid = true;
+        break;
+      }//end inner if
+    }//end outer if
+  }//end for
+  if (valid)
+  {
+    setdirection = turninglookup[i];
+    setspeed = (turningmaxspeed[i] * r / 120);
+  } else {
+    setspeed = 0;
+    setdirection = 0;
+  }
 }
 
 
