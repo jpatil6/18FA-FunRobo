@@ -1,0 +1,18 @@
+MDF's
+
+WallFolow: {exitDock, turnLeft, followWallLeft, turnRight, goStraight}
+- exitDock: Move forward left for a few secs (trigger is time)
+- turnLeft: findObject, swerveAroundIceberg(left), trigger = wall < 3 ft
+- followWallLeft: find objects, maintain distance, trigger = front sonar < 3 ft (sees the dock)
+- turnRight: find objects, turnSharpRight, trigger = front sonar > 3 ft (doesn't see dock anymomre)
+
+
+
+functions:
+findObject: readIR(), readSonar()
+setHeading(int bearing)
+swerveAroundIceberg(int side): with findObject information, setHeading(bearing)
+maintainDistance(int distance, int side)
+
+
+
