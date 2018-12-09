@@ -224,7 +224,8 @@ void loop() {
           realTimeRunStop = false;    //exit real time control loop
           break;
         }
-        
+        votingFunc();
+         moveboat();
         realTimeRunStop = true;     //run loop continually
       }
       else if (command == "figure 8") {
@@ -483,7 +484,7 @@ void votingFunc()
   }
   theta = maximum * 10; // so that we're giving the boat an angle.
   magnitude = voteArray[maximum]; // A number from 0 to 150. It gets bigger as the target gets farther away
-
+  pickBumblebeecircle(magnitude,theta);
 }
 
 // Manual arbiter
@@ -561,6 +562,60 @@ void manualArbiter()
 
 
 // ACT functions act---act---act---act---act---act---act---act---act---act---act---act---act---
+// pickBumblebeeCircle
+// this function accepts a radius and theta to select the rudder and propellor settings
+//incoming r ranges from 0 to 150, theta goes from 0 to 180 degress
+void pickBumblebeeCircle(int r, double theta)
+{
+   
+   r = r*120/150;
+   theta = (180-theta)*PI/180;
+   //Serial.print("r: ");
+   //Serial.println(r);
+   //Serial.print("theta: ");
+   //Serial.println(theta);
+   
+   double zone[] = {-60,-191.5,-347.5,-914,916,333.5,168.5,60};
+   int turningmaxspeed[] = {30,45,60,75,60,45,30}; 
+   int turninglookup[] = {-45,-30,-15,0,15,30,45};
+   int i;
+   boolean valid =false;
+   
+   
+   for(i =0; i < 7; i++)
+   {
+      if(i==3){
+        if((r > zone[i]*cos(theta)) && (r > zone[i+1]*cos(theta)))
+        {
+          //Serial.print("In zone: ");
+          //Serial.println(i+1);
+          valid = true;
+          break;
+        }
+      }else{
+        if((r > zone[i]*cos(theta)) && (r < zone[i+1]*cos(theta)))
+        {
+          //Serial.print("In zone: ");
+          //Serial.println(i+1);
+          valid = true;
+          break;
+        }else if((r < zone[i]*cos(theta))&&(r > zone[i+1]*cos(theta))){
+          //Serial.print("In zone: ");
+          //Serial.println(i+1);
+          valid = true;
+          break;
+        }//end inner if
+      }//end outer if
+   }//end for
+   if(valid)
+   {
+      setdirection = turninglookup[i];
+      setspeed = (turningmaxspeed[i]*r/120); 
+   }else{
+      setspeed = 0;
+      setdirection = 0;
+   }
+}
 
 
 // moveboat function
