@@ -451,28 +451,16 @@ void setHeading(int heading)
 }
 
 void swerveAroundIceberg(int side){
-  setHeading(1);
+  //setHeading(1);
+  if(sonarArray[1] > 100){
+    setHeading(9);
+  }
+  else{
+    setHeading(4);
+  }
+  
 }
 
-//maintainDistance
-void maintainDistance(int dist, int side)
-{
-  if(side==0){
-    if(objectArray[0]<0.9*dist)
-    {
-      setHeading(11);
-    }else if(objectArray[0]>1.1*dist){
-      setHeading(7);
-    }
-  }else if(side==1){
-    if(objectArray[18]<0.9*dist)
-    {
-      setHeading(11);
-    }else if(objectArray[18]>1.1*dist){
-      setHeading(7);
-    }    
-  }
-}
 // Voting Function
 // Takes the gaussian functions from find object and find target and outputs an angle
 // and a distance to the point we want to go to.
