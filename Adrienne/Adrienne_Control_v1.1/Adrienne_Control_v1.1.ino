@@ -354,7 +354,7 @@ void findObjects()
     int objectArrayTemp[19];
     for (int entry = 0; entry < 19; entry++) // then make a gaussian function with those values
     {
-      objectArrayTemp[entry] = objectSize * exp((entry - objectPos) ^ 2 / (2 * objectWidth ^ 2));
+      objectArrayTemp[entry] = objectSize * pow(2.718,-1*(pow((entry - objectPos),2)/(2 * pow(objectWidth,2))));
       // then we populate target array with the values of the gaussian function from 0 to 17
     }
     for (int entry = 0; entry < 19; entry++)
@@ -403,7 +403,7 @@ void findPixyTarget()
 
         for (int entry = 0; entry <= 18; entry++) // then make a gaussian function with those values
         {
-          targetArray[entry] = targetSize * exp((entry - targetPos) ^ 2 / (2 * targetWidth ^ 2));
+          targetArray[entry] = targetSize * pow(2.718,-1*(pow((entry - targetPos),2)/(2 * pow(targetWidth,2))));
           // then we populate target array with the values of the gaussian function from 0 to 17
         }
         break;
