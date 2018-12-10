@@ -194,49 +194,7 @@ void loop() {
         realTimeRunStop = false;     // exit loop after running once
       }
       else if (command == "wallfollow") {
-        Serial.println("In wallfollow");
-        if (wallFollowCounter == 0) {
-          Serial.println("In wallfollow state 0");
-          setHeading(9);
-          if ( sonarArray[1] < 150) {
-            wallFollowCounter++;
-          }
-        }
-        if (wallFollowCounter == 1) {
-          Serial.println("In wallfollow state 1");
-          swerveAroundIceberg(0);     //need to set side
-          if (IRarray[4] <= 100 ) {
-            wallFollowCounter++;
-          }
-        }
-        if (wallFollowCounter == 2) {
-          Serial.println("In wallfollow state 2");
-          setHeading(9);
-          if ( IRarray[1] <= 100 || IRarray [2] <= 100) {
-            wallFollowCounter++;
-          }
-        }
-        if (wallFollowCounter == 3) {
-          Serial.println("In wallfollow state 3");
-          maintainDistance(100, 0);     //need to set side
-          if ( sonarArray[1] <= 40) {
-            wallFollowCounter++;
-          }
-        }
-        if (wallFollowCounter == 4) {
-          Serial.println("In wallfollow state 4");
-          setHeading(13);
-          if ( sonarArray[3] > 40) {
-            wallFollowCounter++;
-          }
-        }
-        if (wallFollowCounter == 5) {
-          Serial.println("In wallfollow state 5");
-          setHeading(9);
-        }
-        votingFunc();
-        moveboat();
-        realTimeRunStop = true;     //run loop continually
+        wallfollow();
       }
       else if (command == "figure 8") {
         // Add fig8 code
@@ -293,6 +251,11 @@ void loop() {
 
 //=============================================================================
 //=============================================================================
+
+
+
+
+
 //FUNCTIONS----FUNCTIONS----FUNCTIONS----FUNCTIONS----FUNCTIONS----FUNCTIONS----FUNCTIONS----FUNCTIONS----
 // Functions for each section of above code
 // Please note: Except for very simple cases, it would be better to place all of these functions in a
@@ -328,7 +291,9 @@ String getOperatorInput()
   return command;
 }
 
+//=========================================================================================
 // SENSE functions sense---sense---sense---sense---sense---sense---sense---sense---sense---
+//=========================================================================================
 
 void findObjects()
 {
@@ -475,8 +440,64 @@ void readSonar()
   sonarArray[5] = reading3;
 }
 
-
+//=========================================================================================
 // THINK functions think---think---think---think---think---think---think---think---think---
+//=========================================================================================
+
+//======================
+//Behaviors
+//======================
+
+void wallfollow(void){
+  Serial.println("In wallfollow");
+        if (wallFollowCounter == 0) {
+          Serial.println("In wallfollow state 0");
+          setHeading(9);
+          if ( sonarArray[1] < 150) {
+            wallFollowCounter++;
+          }
+        }
+        if (wallFollowCounter == 1) {
+          Serial.println("In wallfollow state 1");
+          swerveAroundIceberg(0);     //need to set side
+          if (IRarray[4] <= 100 ) {
+            wallFollowCounter++;
+          }
+        }
+        if (wallFollowCounter == 2) {
+          Serial.println("In wallfollow state 2");
+          setHeading(9);
+          if ( IRarray[1] <= 100 || IRarray [2] <= 100) {
+            wallFollowCounter++;
+          }
+        }
+        if (wallFollowCounter == 3) {
+          Serial.println("In wallfollow state 3");
+          maintainDistance(100, 0);     //need to set side
+          if ( sonarArray[1] <= 40) {
+            wallFollowCounter++;
+          }
+        }
+        if (wallFollowCounter == 4) {
+          Serial.println("In wallfollow state 4");
+          setHeading(13);
+          if ( sonarArray[3] > 40) {
+            wallFollowCounter++;
+          }
+        }
+        if (wallFollowCounter == 5) {
+          Serial.println("In wallfollow state 5");
+          setHeading(9);
+        }
+        votingFunc();
+        moveboat();
+        realTimeRunStop = true;     //run loop continually
+}
+
+
+//======================
+//States
+//======================
 
 // Set Heading. Creates a function that tells the robot where to go directly and puts it in targetArray
 
@@ -492,13 +513,15 @@ void setHeading(int heading)
   }
   Serial.println();
 }
-
-void swerveAroundIceberg(int side) {
-  setHeading(4);
+// Swerve Around Iceberggit
+void swerveAroundIceberg(int side) {  // side 0 is left, side 1 is right
+  if (side == 0){
+    setHeading(4);
+  }
 }
 
 //maintainDistance
-void maintainDistance(int dist, int side)
+void maintainDistance(int dist, int side)   // distance in cm, side: 0 is left, 1 is right
 {
   if (side == 0) {
     if (IRarray[0] < 0.8 * dist)
@@ -516,6 +539,7 @@ void maintainDistance(int dist, int side)
     }
   }
 }
+
 // Voting Function
 // Takes the gaussian functions from find object and find target and outputs an angle
 // and a distance to the point we want to go to.
@@ -614,8 +638,10 @@ void manualArbiter()
   }//close while keepManual
 }//close manualArbiter
 
-
+//=========================================================================================
 // ACT functions act---act---act---act---act---act---act---act---act---act---act---act---act---
+//=========================================================================================
+
 // pickBumblebeeCircle
 // this function accepts a radius and theta to select the rudder and propellor settings
 //incoming r ranges from 0 to 150, theta goes from 0 to 180 degress
