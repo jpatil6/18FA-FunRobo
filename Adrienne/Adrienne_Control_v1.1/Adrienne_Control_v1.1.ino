@@ -78,7 +78,7 @@ const int IR4 = A11;
 const int IR5 = A12;
 const int IR6 = A13;
 int IRarray[6];
-int IRreadingCount = 20;
+int IRreadingCount = 20 ;
 
 //Think variables
 
