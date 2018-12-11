@@ -72,12 +72,12 @@ const int sonar3 = A5;  //sets signal pin for third sonar sensor
 int trigger = 12;  //sets 1 trigger pin for all 3 sensors
 int sonarArray[6];
 
-const int IR1 = A8;
-const int IR2 = A9;
-const int IR3 = A10;
-const int IR4 = A11;
-const int IR5 = A12;
-const int IR6 = A13;
+const int IR1 = 8;
+const int IR2 = 9;
+const int IR3 = 10;
+const int IR4 = 11;
+const int IR5 = 12;
+const int IR6 = 13;
 int IRarray[6];
 int IRreadingCount = 20 ;
 
@@ -448,7 +448,7 @@ void readSonar()
 void fig8() {
   Serial.println("In figure 8"); // leaving dock
   if (fig8Counter == 0) {
-    Serial.println("In figure 8 state 0")
+    Serial.println("In figure 8 state 0");
     setHeading(9);
     if ( sonarArray[1] < 150) {
       fig8Counter++;
@@ -583,14 +583,14 @@ void setHeading(int heading)
   Serial.print("Target array: ");
   for (int entry = 0; entry < 19; entry++) // then make a gaussian function with those values
   {
-    targetArray[entry] = double(100.0 * exp(-pow(entry - heading, 2) / 8));
+    targetArray[entry] = 100 * pow(2.718,-1*(pow((entry - heading),2)/16));
     // then we populate target array with the values of the gaussian function from 0 to 18
     Serial.print(targetArray[entry]);
     Serial.print("\t");
   }
   Serial.println();
 }
-// Swerve Around Iceberggit
+// Swerve Around Iceberg
 void swerveAroundIceberg(int side) {  // side 0 is left, side 1 is right
   if (side == 0) {
     setHeading(4);
