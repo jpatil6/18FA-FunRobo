@@ -55,18 +55,18 @@ TugNeoPixel neo = TugNeoPixel(8, 16);  //initialize NeoPixel object
 
 //Pixy variables
 
-int targetArray[17];
+int targetArray[19];
 Pixy2 pixy;
 
 //Sonar and IR variables
 
-int objectArray[18];
+int objectArray[19];
 
 const int sonar1 = A3;  //sets signal pin for first sonar sensor
 const int sonar2 = A4;  //sets signal pin for second sonar sensor
 const int sonar3 = A5;  //sets signal pin for third sonar sensor
 int trigger = 13;  //sets 1 trigger pin for all 3 sensors
-int sonarZones[] = {0,0,0,0,0};
+float sonarArray[3] = {0, 0, 0};
 
 SharpIR IR1(SharpIR::GP2Y0A02YK0F, A8);
 SharpIR IR2(SharpIR::GP2Y0A02YK0F, A9);
@@ -80,7 +80,7 @@ int IRarray[6] = {0, 0, 0, 0, 0, 0};
 
 //Move variables
 const int rudderPin = 7;
-const int propellorPin = 5;
+const int propellorPin = 6;
 Servo rudder;
 Servo propellor;
 int setspeed;
@@ -288,33 +288,8 @@ String getOperatorInput()
 
 void findTarget()
 {
-  targetArray = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-  int targetPos; //b in the gaussian function
-  int targetWidth; //c in the gaussian functions, the std deviatiation
-  int targetSize; // a in the gaussian function
-  pixy.ccc.getBlocks();
-  for (int i = 0; i <= pixy.ccc.numBlocks; i++) //go through all the pixy blocks
-  {
-    if (pixy.ccc.blocks[i].m_signature = 1) //if it's narwhal colored...
-    {
-      if (pixy.ccc.blocks[i].m_width * pixy.ccc.blocks[i].m_height >= 100)//and it's big:
-      {
-        //this area threshold is arbitrary right now
-        targetPos = map(pixy.ccc.blocks[i].m_x, 0, 316, 0, 180); //we find where it is
-        targetWidth = map(pixy.ccc.blocks[i].m_width,1,316,1,3); // and how much of our field of view it takes
-        targetSize = map(pixy.ccc.blocks[i].m_height,1,208,50,100); // and how close it is, based on height
-        
-        for (int entry = 0; entry <= sizeof(targetArray); i++) // then make a gaussian function with those values
-        {
-          targetArray[entry] = targetSize*exp((entry-targetPos)^2/(2*targetWidth^2));
-          // then we populate target array with the values of the gaussian function from 0 to 17
-        }
-        break;
-      }
-    }
-  }
-}
 
+}
 
 // IR function
 void readIR() {
@@ -338,56 +313,13 @@ void readSonar() {
     Scale factor is (Vcc/512) per inch. A 5V supply yields ~9.8mV/in
     Arduino analog pin goes from 0 to 1024, so the value has to be divided by 2 to get the actual inches
   */
-  // this function alters the sonarZones array. After it runs, 0 in the array means there is nothing there,
-  // and 1 means there is something there.
   digitalWrite(trigger, HIGH);
   delay(1); //triggers the sonars/makes them take a reading
   digitalWrite(trigger, LOW);
 
-  float reading1 = mapSonar(analogRead(sonar1) / 2.0);
-  float reading2 = mapSonar(analogRead(sonar2) / 2.0);
-  float reading3 = mapSonar(analogRead(sonar3) / 2.0);
-
-  if (reading1 < 50) //if there's something the sonar sees within the range of the IR
-  {
-    sonarZones[0] = 1; // it says there's something in that zone
-  }
-  else
-  {
-    sonarZones[0] = 0;
-  }
-  if (reading1 < 50 && reading1-reading2 < 3) //if the two readings are basically the same for sonar1 & 2
-  {
-    sonarZones[1] = 1; //then it says there's something in the second zone
-  }
-  else
-  {
-    sonarZones[1] = 0;
-  }
-  if (reading2 < 50) //if there's something the sonar sees within the range of the IR
-  {
-    sonarZones[2] = 1; // it says there's something in that zone
-  }
-  else
-  {
-    sonarZones[2] = 0;
-  }
-  if (reading2 < 50 && reading2-reading3 < 3) //if the two readings are basically the same for sonar2 & 3
-  {
-    sonarZones[3] = 1; //then it says there's something in the second zone
-  }
-  else
-  {
-    sonarZones[3] = 0;
-  }
-   if (reading3 < 50) //if there's something the sonar sees within the range of the IR
-  {
-    sonarZones[4] = 1; // it says there's something in that zone
-  }
-  else
-  {
-    sonarZones[4] = 0;
-  }
+  sonarArray[0] = mapSonar(analogRead(sonar1) / 2.0);
+  sonarArray[1] = mapSonar(analogRead(sonar2) / 2.0);
+  sonarArray[2] = mapSonar(analogRead(sonar3) / 2.0);
 }
 
 
