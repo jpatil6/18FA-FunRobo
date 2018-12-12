@@ -53,6 +53,8 @@ const long controlLoopInterval = 500; //create a name for control loop cycle tim
 TugNeoPixel neo = TugNeoPixel(8, 16);  //initialize NeoPixel object
 int wallFollowCounter = 0;
 int fig8Counter = 0;
+int fig8DockCounter = 0;
+int huntCounter = 0;
 
 //Sense arrays
 
@@ -200,12 +202,12 @@ void loop() {
         realTimeRunStop = true;     //run loop continually
       }
       else if (command == "figure 8 dock") {
-        // Add fig8dock code
+        fig8Dock();
         Serial.println("Type stop to stop robot");
         realTimeRunStop = true;     //run loop continually
       }
       else if (command == "hunt") {
-        // Add hunt code
+        hunt();
         Serial.println("Type stop to stop robot");
         realTimeRunStop = true;     //run loop continually
       }
@@ -345,9 +347,9 @@ void findObjects()
   Serial.println();
 }
 
-// Pixy function
+// Pixy functions
 
-void findPixyTarget()
+void findPixyTarget(int targetType) // target type is 1 or two. 1 for dock, 2 for narwhal
 {
   for (int entry = 0; entry = 18; entry++)
   {
@@ -359,7 +361,7 @@ void findPixyTarget()
   pixy.ccc.getBlocks();
   for (int i = 0; i <= pixy.ccc.numBlocks; i++) //go through all the pixy blocks
   {
-    if (pixy.ccc.blocks[i].m_signature = 1) //if it's narwhal colored...
+    if (pixy.ccc.blocks[i].m_signature = targetType) //if it's narwhal colored...
     {
       if (pixy.ccc.blocks[i].m_width * pixy.ccc.blocks[i].m_height >= 100)//and it's big:
       {
@@ -374,6 +376,24 @@ void findPixyTarget()
           // then we populate target array with the values of the gaussian function from 0 to 17
         }
         break;
+      }
+    }
+  }
+}
+
+bool checkPixy(int targetType) { // 1 means it looks for the dock, 2 means it looks for the narwhal
+  pixy.ccc.getBlocks();
+  for (int i = 0; i <= pixy.ccc.numBlocks; i++) //go through all the pixy blocks
+  {
+    if (pixy.ccc.blocks[i].m_signature = targetType) //if it's the right color...
+    {
+      if (pixy.ccc.blocks[i].m_width * pixy.ccc.blocks[i].m_height >= 100)//and it's big:
+      {
+        return true;
+      }
+      else
+      {
+        return false;
       }
     }
   }
@@ -525,6 +545,7 @@ void fig8() {
   moveboat();
   realTimeRunStop = true;     //run loop continually
 }
+
 void wallfollow() {
   Serial.println("In wallfollow");
   if (wallFollowCounter == 0) {
@@ -568,10 +589,117 @@ void wallfollow() {
   }
   votingFunc();
   moveboat();
-  realTimeRunStop = true;     //run loop continually
 }
 
+void fig8Dock() {
+  Serial.println("In figure 8"); // leaving dock
+  if (fig8DockCounter == 0) {
+    Serial.println("In figure 8 state 0");
+    setHeading(9);
+    if ( sonarArray[1] < 150) {
+      fig8DockCounter++;
+    }
+  }
+  if (fig8DockCounter == 1) {
+    Serial.println("In figure 8 state 1"); // turning toward the wall
+    swerveAroundIceberg(0);     //need to set side
+    if (IRarray[4] <= 100 ) {
+      fig8DockCounter++;
+    }
+  }
+  if (fig8DockCounter == 2) {
+    Serial.println("In figure 8 state 2"); // go straight toward the wall
+    setHeading(9);
+    if ( IRarray[1] <= 100 || IRarray [2] <= 100) {
+      fig8Counter++;
+    }
+  }
+  if (fig8DockCounter == 3) {
+    Serial.println("In figure 8 state 3"); // follow the wall until you see the iceberg
+    maintainDistance(100, 0);     //need to set side
+    if ( sonarArray[2] <= 130) {
+      fig8Counter++;
+    }
+  }
+  if (fig8DockCounter == 4) {
+    Serial.println("In figure 8 state 4"); // circle around the iceberg until you see the other iceberg
+    circleIceberg(1);
+    if ( sonarArray[0] <= 160) {
+      fig8DockCounter++;
+    }
+  }
+  if (fig8DockCounter == 5) {
+    Serial.println("In figure 8 state 5"); // switch to circling the second iceberg
+    circleIceberg(0);
+    if ( sonarArray[2] <= 160) {
+      fig8DockCounter++;
+    }
+  }
+  if (fig8DockCounter == 6) {
+    Serial.println("In figure 8 state 6"); // start figure 8 two
+    circleIceberg(1);
+    if ( sonarArray[0] <= 160) {
+      fig8DockCounter++;
+    }
+  }
+  if (fig8DockCounter == 7) {
+    Serial.println("In figure 8 state 7"); // finish figure 8 two
+    circleIceberg(0);
+    if ( sonarArray[2] <= 160) {
+      fig8DockCounter++;
+    }
+  }
+  if (fig8DockCounter == 8) {
+    Serial.println("In figure 8 state 8"); // start figure 8 three
+    circleIceberg(1);
+    if ( sonarArray[0] <= 160) {
+      fig8DockCounter++;
+    }
+  }
+  if (fig8DockCounter == 9) {
+    Serial.println("In figure 8 state 9"); // finish figure 8 three
+    circleIceberg(0);
+    if (pixyCheck(1)) {//if it can see the dock
+      fig8DockCounter++;
+    }
+  }
+  if (fig8DockCounter == 10) {
+    Serial.println("In figure 8 state 9"); // finish figure 8 three
+    circleIceberg(0);
+    if (pixyCheck(1) == false) { //when it's too close to see the dock, it stops
+      fig8DockCounter++;
+    }
+  }
+  if (fig8DockCounter == 11) {
+    Serial.println("Done");
+    realTimeRunStop = false;
+  }
+  votingFunc();
+  moveboat();
+}
 
+void hunt() {
+  if (huntCounter == 0) {
+    setHeading(9);
+    if ( sonarArray[1] < 150) {
+      huntCounter++;
+    }
+  }
+  if (huntCounter == 1) {
+    setHeading(15); //circling to look for the critter
+    if (pixycheck(2) == true) {
+      huntCounter++;
+    }
+  }
+  if (huntCounter = 2) {
+    findPixyTarget(2);
+    if (pixyCheck(2) == false) {
+      huntCounter++;
+    }
+    votingFunc();
+    moveboat();
+  }
+}
 //======================
 //States
 //======================
@@ -583,7 +711,7 @@ void setHeading(int heading)
   Serial.print("Target array: ");
   for (int entry = 0; entry < 19; entry++) // then make a gaussian function with those values
   {
-    targetArray[entry] = 100 * pow(2.718,-1*(pow((entry - heading),2)/16));
+    targetArray[entry] = 100 * pow(2.718, -1 * (pow((entry - heading), 2) / 16));
     // then we populate target array with the values of the gaussian function from 0 to 18
     Serial.print(targetArray[entry]);
     Serial.print("\t");
