@@ -32,7 +32,7 @@
 // Load supporting Arduino Libraries
 //========================================================================================
 #include <Servo.h>        // ServoMotors library
-#include <Pixy.h>        // Pixy Library
+#include <Pixy2.h>        // Pixy Library
 #include <SPI.h>          //
 #include <TugNeoPixel.h>  // NeoPixel Ring library
 
@@ -64,7 +64,7 @@ int objectArray[19];
 
 //Pixy variables
 
-Pixy pixy;
+Pixy2 pixy;
 
 //Sonar and IR variables
 
@@ -358,17 +358,17 @@ void findPixyTarget(int targetType) // target type is 1 or two. 1 for dock, 2 fo
   int targetPos; //b in the gaussian function
   int targetWidth; //c in the gaussian functions, the std deviatiation
   int targetSize; // a in the gaussian function
-  uint16_t blocks = pixy.getBlocks();
-  for (int i = 0; i <= blocks; i++) //go through all the pixy blocks
+  pixy.ccc.getBlocks();
+  for (int i = 0; i <= pixy.ccc.numBlocks; i++) //go through all the pixy blocks
   {
-    if (pixy.blocks[i].signature = targetType) //if it's narwhal colored...
+    if (pixy.ccc.blocks[i].m_signature = targetType) //if it's narwhal colored...
     {
-      if (pixy.blocks[i].width * pixy.blocks[i].height >= 100)//and it's big:
+      if (pixy.ccc.blocks[i].m_width * pixy.ccc.blocks[i].m_height >= 100)//and it's big:
       {
         //this area threshold is arbitrary right now
-        targetPos = map(pixy.blocks[i].x, 0, 319, 6, 12); //we find where it is
-        targetWidth = map(pixy.blocks[i].width, 1, 320, 1, 3); // and how much of our field of view it takes
-        targetSize = map(pixy.blocks[i].height, 1, 200, 50, 100); // and how close it is, based on height
+        targetPos = map(pixy.ccc.blocks[i].m_x, 0, 316, 6, 12); //we find where it is
+        targetWidth = map(pixy.ccc.blocks[i].m_width, 1, 316, 1, 3); // and how much of our field of view it takes
+        targetSize = map(pixy.ccc.blocks[i].m_height, 1, 208, 50, 100); // and how close it is, based on height
 
         for (int entry = 0; entry <= 18; entry++) // then make a gaussian function with those values
         {
@@ -382,12 +382,12 @@ void findPixyTarget(int targetType) // target type is 1 or two. 1 for dock, 2 fo
 }
 
 bool checkPixy(int targetType) { // 1 means it looks for the dock, 2 means it looks for the narwhal
-  uint16_t blocks = pixy.getBlocks();
-  for (int i = 0; i <= blocks; i++) //go through all the pixy blocks
+  pixy.ccc.getBlocks();
+  for (int i = 0; i <= pixy.ccc.numBlocks; i++) //go through all the pixy blocks
   {
-    if (pixy.blocks[i].signature = targetType) //if it's the right color...
+    if (pixy.ccc.blocks[i].m_signature = targetType) //if it's the right color...
     {
-      if (pixy.blocks[i].width * pixy.blocks[i].height >= 100)//and it's big:
+      if (pixy.ccc.blocks[i].m_width * pixy.ccc.blocks[i].m_height >= 100)//and it's big:
       {
         return true;
       }
