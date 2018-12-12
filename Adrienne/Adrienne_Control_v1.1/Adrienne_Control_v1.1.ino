@@ -687,7 +687,7 @@ void hunt() {
   }
   if (huntCounter == 1) {
     setHeading(15); //circling to look for the critter
-    if (pixycheck(2) == true) {
+    if (pixyCheck(2) == true) {
       huntCounter++;
     }
   }
@@ -741,6 +741,26 @@ void maintainDistance(int dist, int side)   // distance in cm, side: 0 is left, 
       setHeading(12);
     } else if (IRarray[18] > 1.1 * dist) {
       setHeading(6);
+    }
+  }
+}
+
+void circleIceberg(int side)
+{
+  if (side == 0){
+    if (IRarray[0] < 100){
+      setHeading(9);
+    }
+    else{
+      setHeading(5);
+    }
+  }
+  if (side == 1){
+    if (IRarray[5] < 100){
+      setHeading(9);
+    }
+    else{
+      setHeading(13);
     }
   }
 }
