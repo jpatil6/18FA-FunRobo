@@ -513,42 +513,79 @@ void fig8() {                                      //function that commands the 
       fig8Counter++;                               //trigger state 4
     }
   }
-  if (fig8Counter == 5) {                          //
-    Serial.println("In figure 8 state 5"); // switch to circling the second iceberg
-    circleIceberg(0);
-    if ( sonarArray[2] <= 160) {
-      fig8Counter++;
+  if (fig8Counter == 5){                           //if state 5 has been triggered
+     Serial.println("In figure 8 state 5");        //indicate to roboticists which state the boat is in
+     setHeading(7);                                //command boat to turn slightly to the left until
+     if ( sonarArray[0] <= 100){                   //if sonar detects something (iceberg) within 100 cm on the left side then
+        fig8Counter++;                             //trigger state 6
+     }
+  }
+  if (fig8Counter == 6) {                          //if state 6 has been triggered
+    Serial.println("In figure 8 state 6");         //indicate to roboticists which state the boat is in
+    circleIceberg(0);                              //command boat to circle iceberg on port side until
+    if ( sonarArray[2] <= 160) {                   //if sonar detects something (other iceberg) infront of it within 160 cm then
+      fig8Counter++;                               //trigger state 7
     }
   }
-  if (fig8Counter == 6) {
-    Serial.println("In figure 8 state 6"); // start figure 8 two
+  if (fig8Counter == 7){                           //if state 7 has been triggered
+     Serial.println("In figure 8 state 7");        //indicate to roboticists which state the boat is in
+     setHeading(11);                                //command boat to turn slightly to the right until
+     if ( sonarArray[0] <= 100){                   //if sonar detects something (iceberg) within 100 cm on the left side then
+        fig8Counter++;                             //trigger state 8
+     }
+  }
+  //Figure 8 #2 
+  if (fig8Counter == 8) {                          //if state 8 has been triggered
+    Serial.println("In figure 8 state 8"); // start figure 8 two
     circleIceberg(1);
     if ( sonarArray[0] <= 160) {
       fig8Counter++;
     }
   }
-  if (fig8Counter == 7) {
-    Serial.println("In figure 8 state 7"); // finish figure 8 two
-    circleIceberg(0);
-    if ( sonarArray[2] <= 160) {
-      fig8Counter++;
-    }
-  }
-  if (fig8Counter == 8) {
-    Serial.println("In figure 8 state 8"); // start figure 8 three
-    circleIceberg(1);
-    if ( sonarArray[0] <= 160) {
-      fig8Counter++;
-    }
-  }
-  if (fig8Counter == 9) {
-    Serial.println("In figure 8 state 9"); // finish figure 8 three
-    circleIceberg(0);
-    if ( sonarArray[2] <= 160) {
-      fig8Counter++;
-    }
-  }
+  if (fig8Counter == 9){                           //if state 9 has been triggered
+     Serial.println("In figure 8 state 9");        //indicate to roboticists which state the boat is in
+     setHeading(7);                                //command boat to turn slightly to the left until
+     if ( sonarArray[0] <= 100){                   //if sonar detects something (iceberg) within 100 cm on the left side then
+        fig8Counter++;                             //trigger state 10
+     }
+  }   
   if (fig8Counter == 10) {
+    Serial.println("In figure 8 state 10"); // finish figure 8 two
+    circleIceberg(0);
+    if ( sonarArray[2] <= 160) {
+      fig8Counter++;
+    }
+  }
+  if (fig8Counter == 11){                           //if state 11 has been triggered
+     Serial.println("In figure 8 state 11");        //indicate to roboticists which state the boat is in
+     setHeading(7);                                //command boat to turn slightly to the left until
+     if ( sonarArray[0] <= 100){                   //if sonar detects something (iceberg) within 100 cm on the left side then
+        fig8Counter++;                             //trigger state 12
+     }
+  }   
+  //Figure 8 #3 
+  if (fig8Counter == 12) {
+    Serial.println("In figure 8 state 12"); // start figure 8 three
+    circleIceberg(1);
+    if ( sonarArray[0] <= 160) {
+      fig8Counter++;
+    }
+  }
+  if (fig8Counter == 13){                           //if state 13 has been triggered
+     Serial.println("In figure 8 state 13");        //indicate to roboticists which state the boat is in
+     setHeading(7);                                //command boat to turn slightly to the left until
+     if ( sonarArray[0] <= 100){                   //if sonar detects something (iceberg) within 100 cm on the left side then
+        fig8Counter++;                             //trigger state 14
+     }
+  }   
+  if (fig8Counter == 14) {
+    Serial.println("In figure 8 state 14"); // finish figure 8 three
+    circleIceberg(0);
+    if ( sonarArray[2] <= 160) {
+      fig8Counter++;
+    }
+  }
+  if (fig8Counter == 15) {
     Serial.println("Done");
     realTimeRunStop = false;
   }
