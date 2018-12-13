@@ -381,7 +381,7 @@ void findPixyTarget(int targetType) // target type is 1 or two. 1 for dock, 2 fo
   }
 }
 
-bool checkPixy(int targetType) { // 1 means it looks for the dock, 2 means it looks for the narwhal
+bool pixyCheck(int targetType) { // 1 means it looks for the dock, 2 means it looks for the narwhal
   pixy.ccc.getBlocks();
   for (int i = 0; i <= pixy.ccc.numBlocks; i++) //go through all the pixy blocks
   {
@@ -747,19 +747,19 @@ void maintainDistance(int dist, int side)   // distance in cm, side: 0 is left, 
 
 void circleIceberg(int side)
 {
-  if (side == 0){
-    if (IRarray[0] < 100){
+  if (side == 0) {
+    if (IRarray[0] < 100) {
       setHeading(9);
     }
-    else{
+    else {
       setHeading(5);
     }
   }
-  if (side == 1){
-    if (IRarray[5] < 100){
+  if (side == 1) {
+    if (IRarray[5] < 100) {
       setHeading(9);
     }
-    else{
+    else {
       setHeading(13);
     }
   }
