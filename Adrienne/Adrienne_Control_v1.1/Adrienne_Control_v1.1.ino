@@ -49,7 +49,7 @@ const long controlLoopInterval = 500; //create a name for control loop cycle tim
 
 int startupcounter = 0;
 
-// Time loop counters
+// Time loop counters (indicates which stage of the command the boat is doing)
 int wallFollowCounter = 0;
 int fig8Counter = 0;
 int fig8DockCounter = 0;
@@ -59,7 +59,7 @@ int huntCounter = 0;
 TugNeoPixel neo = TugNeoPixel(8, 16);  //initialize NeoPixel object
 
 
-//Sense arrays
+//Sense arrays (array length is 19 ints)
 
 int targetArray[19];
 int objectArray[19];
@@ -158,8 +158,8 @@ void loop() {
     // Check if operator inputs a command during real-time loop eecution
     if (Serial.available() > 0) {     // check to see if operator typed at OCU
       realTimeRunStop = false;      // if OCU input typed, stop control loop
-      setspeed = 0;
-      setdirection = 0;
+      setspeed = 0;               
+      setdirection = 0;            
       moveboat();
       command = Serial.readString();      // read command string to clear buffer
       command = "stop";
@@ -198,7 +198,7 @@ void loop() {
         manualArbiter();
         realTimeRunStop = false;     // exit loop after running once
       }
-      else if (command == "wallfollow") {
+      else if (command == "wallfollow") {    //command to tell boat to exit the dock and follow the wall 
         if (startupcounter > 5)
         {
           wallfollow();
@@ -206,16 +206,16 @@ void loop() {
           startupcounter++;
         }
       }
-      else if (command == "figure 8") {
+      else if (command == "figure 8") {      //command to tell boat to exit dock and do a figure 8 around the icebergs 3 times
         fig8();
         realTimeRunStop = true;     //run loop continually
       }
-      else if (command == "figure 8 dock") {
+      else if (command == "figure 8 dock") { //similar to figure 8 code but only does one figure 8 and then returns to the dock
         fig8Dock();
         Serial.println("Type stop to stop robot");
         realTimeRunStop = true;     //run loop continually
       }
-      else if (command == "hunt") {
+      else if (command == "hunt") {          //find and chase narwhale 
         hunt();
         Serial.println("Type stop to stop robot");
         realTimeRunStop = true;     //run loop continually
