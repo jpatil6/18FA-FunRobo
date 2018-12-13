@@ -485,24 +485,24 @@ void fig8() {                                      //function that commands the 
       fig8Counter++;                               //trigger state 1
     }
   }
-  if (fig8Counter == 1) {
-    Serial.println("In figure 8 state 1"); // turning toward the wall
-    setHeading (5);     //need to set side
-    if (IRarray[4] <= 100 ) {
-      fig8Counter++;
+  if (fig8Counter == 1) {                          //if state 1 has been triggered
+    Serial.println("In figure 8 state 1");         //indicate to roboticists which state the boat is in
+    setHeading (5);     //need to set side         //tells boat to turn to port side
+    if (IRarray[4] <= 100 ) {                      //if/until the boat detects the wall infront of it within 100 cm then
+      fig8Counter++;                               //trigger state 2
     }
   }
-  if (fig8Counter == 2) {
-    Serial.println("In figure 8 state 2"); // go straight toward the wall
-    setHeading(9);
-    if ( IRarray[1] <= 100 || IRarray [2] <= 100) {
-      fig8Counter++;
+  if (fig8Counter == 2) {                          //if state 2 has been triggered
+    Serial.println("In figure 8 state 2");         //indicate to roboticists which state the boat is in
+    setHeading(9);                                 //tell boat to drive straight
+    if ( IRarray[1] <= 100 || IRarray [2] <= 100) {//if/until it sees something in front/on its port side within 100 cm then
+      fig8Counter++;                               //trigger state 3
     }
   }
-  if (fig8Counter == 3) {
-    Serial.println("In figure 8 state 3"); // follow the wall until you see the iceberg
-    maintainDistance(100, 0);     //need to set side
-    if ( sonarArray[2] <= 130) {
+  if (fig8Counter == 3) {                          //if state 3 has been triggered
+    Serial.println("In figure 8 state 3");         //indicate to roboticists which state the boat is in
+    maintainDistance(100, 0);  //need to set side  //tell boat to maintain a distance of 100cm from the wall on it's port side until
+    if ( sonarArray[2] <= 130) {                   //if boat detects 
       fig8Counter++;
     }
   }
