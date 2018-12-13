@@ -476,13 +476,13 @@ void readSonar()
 //======================
 //Behaviors
 //======================
-void fig8() {
-  Serial.println("In figure 8"); // leaving dock
-  if (fig8Counter == 0) {
-    Serial.println("In figure 8 state 0");
-    setHeading(9);
-    if ( sonarArray[1] < 150) {
-      fig8Counter++;
+void fig8() {                                      //function that commands the boat to leave the dock and do a figure 8 around the icebergs 3 times
+  Serial.println("In figure 8"); // leaving dock   //indicate to roboticists that it is currently executing fig8 function
+  if (fig8Counter == 0) {                          //if boat was just commanded to do fig8, counter would start in 0 and trigger the initial state
+    Serial.println("In figure 8 state 0");         //indicate to rboticists which state the boat is in
+    setHeading(9);                                 //boat drives out of dock
+    if ( sonarArray[1] < 150) {                    //if sonars see something (iceberg) within 150 cm then
+      fig8Counter++;                               //trigger state 1
     }
   }
   if (fig8Counter == 1) {
@@ -568,7 +568,7 @@ void wallfollow() {                                 //wall following function
   }
   if (wallFollowCounter == 1) {                    //if state 1 has been triggered
     Serial.println("In wallfollow state 1");       //indicate to roboticists which state the boat is in
-    swerveAroundIceberg(0);     //need to set side //once the boat sees the iceberg, it should turn to the port side
+    setHeading (5);                                //once the boat sees the iceberg, it should turn to the port side
     if (sonarArray[4] <= 150 ) {                   //if sonars detect iceberg on its starboard side then
       wallFollowCounter++;                         //trigger state 2
     }
@@ -603,16 +603,16 @@ void wallfollow() {                                 //wall following function
   }
   if (wallFollowCounter == 6) {                    //if state 6 has been triggered
     Serial.println("In wallfollow state 6");       //indicate to roboticists which state the boat is in
-    setHeading(9);                                 //
+    setHeading(9);                                 //tell boat to go straight ahead
   }
   votingFunc();
   moveboat();
 }
 
-void fig8Dock() {
-  Serial.println("In figure 8"); // leaving dock
-  if (fig8DockCounter == 0) {
-    Serial.println("In figure 8 state 0");
+void fig8Dock() {                                        //Figure 8 and self docking function
+  Serial.println("In figure 8"); // leaving dock         //indicate to roboticists that the boat is currently attempting to do a figure 8 around the icebergs
+  if (fig8DockCounter == 0) {                            //if boat was just commanded to do fig8Dock, counter would start in 0 and trigger the initial state
+    Serial.println("In figure 8 state 0");               //indicate to roboticists which state the boat is in
     setHeading(9);
     if ( sonarArray[1] < 150) {
       fig8DockCounter++;
