@@ -487,7 +487,7 @@ void fig8() {                                      //function that commands the 
   }
   if (fig8Counter == 1) {
     Serial.println("In figure 8 state 1"); // turning toward the wall
-    swerveAroundIceberg(0);     //need to set side
+    setHeading (5);     //need to set side
     if (IRarray[4] <= 100 ) {
       fig8Counter++;
     }
