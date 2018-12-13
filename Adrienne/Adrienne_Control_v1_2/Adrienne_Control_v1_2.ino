@@ -35,7 +35,6 @@
 #include <Pixy2.h>        // Pixy Library
 #include <SPI.h>          //
 #include <TugNeoPixel.h>  // NeoPixel Ring library
-#include <math.h>
 
 //========================================================================================
 // Create and initialize global variables, objects and constants (containers for all data)
@@ -339,8 +338,6 @@ void findObjects()
     Serial.print(IRarray[i]);
     Serial.print("\t");
   }
-  Serial.print("\t");
-  Serial.print(sonarArray[2]);
   Serial.println();
   /*
     Serial.print("Sonararray: ");
@@ -491,28 +488,28 @@ void wallfollow() {
   if (wallFollowCounter == 1) {
     Serial.println("In wallfollow state 1");
     setHeading(2);     //need to set side
-    if (startupcounter > 34 ) {
+    if (startupcounter > 30 ) {
       wallFollowCounter++;
     }
   }
   if (wallFollowCounter == 2) {
     Serial.println("In wallfollow state 2");
     setHeading(9);
-    if (sonarArray [2] <= 100) {
+    if (IRarray [2] <= 120) {
       wallFollowCounter ++;
     }
   }
   if (wallFollowCounter == 3) {
     Serial.println("In wallfollow state 3");
     setHeading(16);
-    if (IRarray[2] <= 80) {
+    if (IRarray[2] <= 100) {
       wallFollowCounter++;
     }
   }
   if (wallFollowCounter == 4) {
     Serial.println("In wallfollow state 4");
-    maintainDistanceProportional(70, 0);     //need to set side
-    if ( IRarray[2] <= 0 ) {
+    maintainDistance(70, 0);     //need to set side
+    if ( IRarray[2] <= 40 ) {
       wallFollowCounter++;
     }
   }
@@ -732,7 +729,7 @@ void hunt() {
 
 void setHeading(int heading)
 {
-  //Serial.print("Target array: ");
+  Serial.print("Target array: ");
   for (int entry = 0; entry < 19; entry++) // then make a gaussian function with those values
   {
     targetArray[entry] = 100 * pow(2.718, -1 * (pow((entry - heading), 2) / 16));
@@ -759,38 +756,6 @@ void maintainDistance(int dist, int side)   // distance in cm, side: 0 is left, 
       setHeading(6);
     }
   }
-}
-
-void maintainDistanceProportional(int dist, int side)   // distance in cm, side: 0 is left, 1 is right
-{
-  if (side == 0) {
-    int convert;
-    if((IRarray[0]>0.8*dist)&&(IRarray[0]<1.2*dist))
-    {
-      double alpha = (180*atan((IRarray[1]*sin(PI/8))/(IRarray[0]-(IRarray[1]*cos(PI/8)))))/PI;
-      if (alpha < 0)
-      {
-        convert = -alpha;
-      }else{
-        convert = 180 - alpha;
-      }
-      convert = convert/10;
-    }else if(IRarray[0]<0.8*dist){
-      convert = 12; 
-    }else if(IRarray[0]>1.2*dist){
-      convert = 8;
-    }
-    setHeading(convert);
-  }
-  if (side == 1) {
-    if (IRarray[18] < 0.8 * dist)
-    {
-      setHeading(13);
-    } else if (IRarray[18] > 1.1 * dist) {
-      setHeading(6);
-    }
-  }
-  
 }
 
 void circleIceberg(int side)
@@ -929,7 +894,7 @@ void pickBumblebeeCircle(int r, double theta)
   //Serial.println(theta);
 
   double zone[] = { -60, -191.5, -347.5, -914, 916, 333.5, 168.5, 60};
-  int turningmaxspeed[] = {30, 30, 30, 30, 30, 30, 30};
+  int turningmaxspeed[] = {25, 25, 25, 25, 25, 25, 25};
   int turninglookup[] = { -45, -30, -15, 0, 15, 30, 45};
   int i;
   boolean valid = false;
