@@ -75,26 +75,27 @@ const int sonar1 = A3;  //sets signal pin for first sonar sensor
 const int sonar2 = A4;  //sets signal pin for second sonar sensor
 const int sonar3 = A5;  //sets signal pin for third sonar sensor
 int trigger = 12;  //sets 1 trigger pin for all 3 sensors
-int sonarArray[6];
+int sonarArray[6];      //sets Array length to 6 ints
 
+//Digital pins that IRs are plugged into:
 const int IR1 = 8;
 const int IR2 = 9;
 const int IR3 = 10;
 const int IR4 = 11;
 const int IR5 = 12;
 const int IR6 = 13;
-int IRarray[6];
+int IRarray[6];      //sets Array length to 6 ints
 int IRreadingCount = 20 ;
 
 //Think variables
 
 //Move variables
-const int rudderPin = 7;
-const int propellorPin = 6;
-Servo rudder;
-Servo propellor;
-int setspeed; // these directly tell the boat where to go
-int setdirection;
+const int rudderPin = 7;      //Rudders are connected to digital pin 7
+const int propellorPin = 6;   //props are connected to digital pin 6
+Servo rudder;                 // setting rudder as servo variable
+Servo propellor;              // setting props as servo variable
+int setspeed;                 // tells boat what the prop speed should be
+int setdirection;             // tells boat how to direct rudders
 
 
 //=========================================================================================
@@ -124,9 +125,9 @@ void setup()
   //Think initializing
 
   //Move initializing
-  propellor.attach(propellorPin);
-  rudder.attach(rudderPin);
-  propellor.writeMicroseconds(1400);
+  propellor.attach(propellorPin);      //dictates which pin commands prop servo
+  rudder.attach(rudderPin);            //dictates which pin commands rudder servo
+  propellor.writeMicroseconds(1400);   //tells props to be idle
 }
 
 //=============================================================================
