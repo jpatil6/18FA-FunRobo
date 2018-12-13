@@ -304,7 +304,7 @@ String getOperatorInput()
 // SENSE functions sense---sense---sense---sense---sense---sense---sense---sense---sense---
 //=========================================================================================
 
-void findObjects()
+void findObjects() //function to detect objects using both IR & Sonar
 {
   int objectArrayTemp[19];
   for (int entry = 0; entry < 19; entry++)
@@ -557,53 +557,53 @@ void fig8() {
   realTimeRunStop = true;     //run loop continually
 }
 
-void wallfollow() {
+void wallfollow() {                                 //wall following function
   Serial.println("In wallfollow");
-  if (wallFollowCounter == 0) {
-    Serial.println("In wallfollow state 0");
-    setHeading(9);
-    if ( sonarArray[2] < 330) {
-      wallFollowCounter++;
+  if (wallFollowCounter == 0) {                    //if the boat is commanded to wallFollow, counter would start at 0 (int wallFollowCounter = 0, as per indicated above)
+    Serial.println("In wallfollow state 0");       //indicates to roboticists which state the boat is in
+    setHeading(9);                                 //boat drives out of the dock
+    if ( sonarArray[2] < 330) {                    //until it detects the wall of the pool within 11 feet
+      wallFollowCounter++;                         //then it adds to the counter and triggers state 1
     }
   }
-  if (wallFollowCounter == 1) {
-    Serial.println("In wallfollow state 1");
-    swerveAroundIceberg(0);     //need to set side
-    if (sonarArray[4] <= 150 ) {
-      wallFollowCounter++;
+  if (wallFollowCounter == 1) {                    //if state 1 has been triggered
+    Serial.println("In wallfollow state 1");       //indicate to roboticists which state the boat is in
+    swerveAroundIceberg(0);     //need to set side //once the boat sees the iceberg, it should turn to the port side
+    if (sonarArray[4] <= 150 ) {                   //if sonars detect iceberg on its starboard side then
+      wallFollowCounter++;                         //trigger state 2
     }
   }
-  if (wallFollowCounter == 2) {
-    Serial.println("In wallfollow state 2");
-    setHeading(9);
-    if ( IRarray[1] <= 100 || IRarray [2] <= 100) {
-      wallFollowCounter++;
+  if (wallFollowCounter == 2) {                    //if state 2 has been triggered
+    Serial.println("In wallfollow state 2");       //indicate to roboticists which state the boat is in
+    setHeading(9);                                 //tell the rudders to straighten out and drive straight (to the wall)
+    if ( IRarray[1] <= 100 || IRarray [2] <= 100) {//if IRs detect wall on port side and in front then
+      wallFollowCounter++;                         //trigger state 3
     }
   }
-  if (wallFollowCounter == 3) {
-    Serial.println("In wallfollow state 3");
-    setHeading(16);
-    if ( IRarray[0] <= 80) {
-      wallFollowCounter++;
+  if (wallFollowCounter == 3) {                    //if state 3 has been triggered
+    Serial.println("In wallfollow state 3");       //indicate to roboticists which state the boat is in
+    setHeading(16);                                //tell boat to turn rudders and turn to its starboard side
+    if ( IRarray[0] <= 80) {                       //If/once the boat detects the wall on its port side within 80 cm then
+      wallFollowCounter++;                         //trigger state 4
     }
   }
-  if (wallFollowCounter == 4) {
-    Serial.println("In wallfollow state 4");
-    maintainDistance(70, 0);     //need to set side
-    if ( sonarArray[2] <= 40 && IRarray[3] > 100) {
-      wallFollowCounter++;
+  if (wallFollowCounter == 4) {                    //if state 4 has been triggered
+    Serial.println("In wallfollow state 4");       //indicate to roboticists which state the boat is in
+    maintainDistance(70, 0);   //need to set side  //use maintainDistance function to command boat to maintain a 70 cm gap between it and the wall on the port side
+    if ( sonarArray[2] <= 40 && IRarray[3] > 100) {//if sonar detects something in front of it within 40 cm and the IR does not, then the boat has seen the dock and then
+      wallFollowCounter++;                         //trigger state 5
     }
   }
-  if (wallFollowCounter == 5) {
-    Serial.println("In wallfollow state 5");
-    setHeading(13);
-    if ( sonarArray[3] > 40) {
-      wallFollowCounter++;
+  if (wallFollowCounter == 5) {                    //if state 5 has been triggered
+    Serial.println("In wallfollow state 5");       //indicate to roboticists which state the boat is in
+    setHeading(13);                                //tell boat to turn rudders to turn boat slightly to its starboard direction
+    if ( sonarArray[3] > 40) {                     //if the front sonar no longer detects the dock then
+      wallFollowCounter++;                         //trigger state 6
     }
   }
-  if (wallFollowCounter == 6) {
-    Serial.println("In wallfollow state 6");
-    setHeading(9);
+  if (wallFollowCounter == 6) {                    //if state 6 has been triggered
+    Serial.println("In wallfollow state 6");       //indicate to roboticists which state the boat is in
+    setHeading(9);                                 //
   }
   votingFunc();
   moveboat();
