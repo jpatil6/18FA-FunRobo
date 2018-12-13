@@ -502,18 +502,18 @@ void fig8() {                                      //function that commands the 
   if (fig8Counter == 3) {                          //if state 3 has been triggered
     Serial.println("In figure 8 state 3");         //indicate to roboticists which state the boat is in
     maintainDistance(100, 0);  //need to set side  //tell boat to maintain a distance of 100cm from the wall on it's port side until
-    if ( sonarArray[2] <= 130) {                   //if boat detects 
-      fig8Counter++;
+    if ( sonarArray[4] <= 130) {                   //if boat detects iceberg within a distance of 130 cm on starboard side then
+      fig8Counter++;                               //trigger state 4
     }
   }
-  if (fig8Counter == 4) {
-    Serial.println("In figure 8 state 4"); // circle around the iceberg until you see the other iceberg
-    circleIceberg(1);
-    if ( sonarArray[0] <= 160) {
-      fig8Counter++;
+  if (fig8Counter == 4) {                          //if state 4 has been triggered
+    Serial.println("In figure 8 state 4");         //indicate to roboticists which state the boat is in
+    circleIceberg(1);                              //command boat to circle iceberg on starboard side until
+    if ( sonarArray[0] <= 160) {                   //if sonar detects something (other iceberg) within 160 cm on port side then
+      fig8Counter++;                               //trigger state 4
     }
   }
-  if (fig8Counter == 5) {
+  if (fig8Counter == 5) {                          //
     Serial.println("In figure 8 state 5"); // switch to circling the second iceberg
     circleIceberg(0);
     if ( sonarArray[2] <= 160) {
