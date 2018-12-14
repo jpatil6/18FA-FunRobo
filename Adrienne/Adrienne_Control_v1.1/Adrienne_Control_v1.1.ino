@@ -48,9 +48,9 @@ unsigned long newLoopTime = 0;    //create a name for new loop time in milliseco
 unsigned long cycleTime = 0;      //create a name for elapsed loop cycle time
 const long controlLoopInterval = 250; //create a name for control loop cycle time in milliseconds
 
-unsigned long startupcounter = 0;
+unsigned long loopCounter = 0;         //loop counter
 
-// Time loop counters
+// Time loop counters (indicates which stage of the command the boat is doing)
 int wallFollowCounter = 0;
 int fig8Counter = 0;
 int fig8DockCounter = 0;
@@ -75,7 +75,7 @@ Pixy2 pixy;
 const int sonar1 = A3;  //sets signal pin for first sonar sensor
 const int sonar2 = A4;  //sets signal pin for second sonar sensor
 const int sonar3 = A5;  //sets signal pin for third sonar sensor
-int trigger = 12;  //sets 1 trigger pin for all 3 sensors
+int trigger = 12;       //sets 1 trigger pin for all 3 sensors
 int sonarArray[6];      //sets Array length to 6 ints
 
 //Digital pins that IRs are plugged into:
@@ -146,7 +146,7 @@ void loop() {
   if (command == "stop") realTimeRunStop = false;     // skip real time inner loop
   else realTimeRunStop = true;                        // Set loop flag to run = true
 
-  startupcounter = 0;
+  loopCounter = 0;
   wallFollowCounter = 0;
 
   // 4)Put your main flight code into "inner" soft-real-time while loop structure below, to run repeatedly,
@@ -200,11 +200,11 @@ void loop() {
         realTimeRunStop = false;     // exit loop after running once
       }
       else if (command == "wallfollow") {   //command to teel boat to exit the dock and follow the wall
-        if (startupcounter > 6)
+        if (loopCounter > 6)
         {
           wallfollow();
         }
-        startupcounter++;
+        loopCounter++;
       }
       else if (command == "figure 8") {   //command to tell boat to exit dock and do a figure 8 around the icebergs 3 times
         fig8();
@@ -476,59 +476,59 @@ void readSonar()
 //======================
 //Behaviors
 //======================
-void wallfollow() {
+void wallfollow() {                                //wall following function
   //Serial.println("In wallfollow");
   if (wallFollowCounter == 0) {                    //if the boat is commanded to wallFollow, counter would start at 0 (int wallFollowCounter = 0, as per indicated above)
     Serial.println("In wallfollow state 0");       //indicates to roboticists which state the boat is in
     setHeading(9);                                 //boat drives out of the dock
-    if (startupcounter > 18) {                     //until it detects the wall of the pool within 11 feet
-      wallFollowCounter++;                         //then it adds to the counter and triggers state 1
-      startupcounter = 0;
+    if (loopCounter > 18) {                        //until 18 realTimeLoops have passed (~ 4.5 s) then
+      wallFollowCounter++;                         //trigger state 1
+      loopCounter = 0;                             //reset loopCounter to 0
     }
   }
   if (wallFollowCounter == 1) {                    //if state 1 has been triggered
     Serial.println("In wallfollow state 1");       //indicate to roboticists which state the boat is in
     setHeading (6);                                //once the boat sees the iceberg, it should turn to the port side
-    if (startupcounter > 16 ) {                    
-      wallFollowCounter++;
-      startupcounter = 0;
+    if (loopCounter > 16 ) {                       //until 16 realTimeLoops have passed (~ 4 s)
+      wallFollowCounter++;                         //trigger state 2
+      loopCounter = 0;                             //reset loopCounter to 0
     }
   }
-  if (wallFollowCounter == 2) {
-    Serial.println("In wallfollow state 2");
-    setHeading(9);
-    if (sonarArray [1] <= 140) {
-      wallFollowCounter ++;
-      startupcounter = 0;
+  if (wallFollowCounter == 2) {                    //if state 2 has been triggered
+    Serial.println("In wallfollow state 2");       //indicate to roboticists which state the boat is in
+    setHeading(9);                                 //command boat to go straight
+    if (sonarArray [1] <= 140) {                   //until sonar detects something (wall) within 140 cm on port side
+      wallFollowCounter ++;                        //trigger state 3
+      loopCounter = 0;
     }
   }
-  if (wallFollowCounter == 3) {
+  if (wallFollowCounter == 3) {                    //state 3
     Serial.println("In wallfollow state 3");
-    setHeading(13);
-    if (sonarArray[1] <= 90) {
-      wallFollowCounter++;
-      startupcounter = 0;
+    setHeading(13);                                //command boat to turn slightly to starboard side
+    if (sonarArray[1] <= 90) {                     //until sonar detects something (wall) within 90 cm on port side
+      wallFollowCounter++;                         //trigger state 4
+      loopCounter = 0;
     }
   }
-  if (wallFollowCounter == 4) {
+  if (wallFollowCounter == 4) {                    //state 4
     Serial.println("In wallfollow state 4");
-    maintainDistanceProportional(80, 0);     //need to set side
-    if ((startupcounter >= 32) && (IRarray[4] <= 90)) {
-      wallFollowCounter++;
-      startupcounter = 0;
+    maintainDistanceProportional(80, 0);           //command boat to maintain a distance of 80 cm from the wall on its portside
+    if ((loopCounter >= 32) && (IRarray[4] <= 90)) {//until at least 32 realTimeLoops (~8 s) have passed & IR detects something within 90 cm infront of the boat
+      wallFollowCounter++;                         //trigger state 5
+      loopCounter = 0;
     }
   }
-  if (wallFollowCounter == 5) {
-    Serial.println("In wallfollow state 5");
-    setHeading(12);
-    if (startupcounter >= 36) {
-      wallFollowCounter++;
-      startupcounter = 0;
+  if (wallFollowCounter == 5) {                    //state 5
+    Serial.println("In wallfollow state 5");       
+    setHeading(12);                                //command boat to turn slightly to its starboard side
+    if (loopCounter >= 36) {                       //until 36 realTimeLoops (~9s) have passed
+      wallFollowCounter++;                         //trigger state 6
+      loopCounter = 0;
     }
   }
-  if (wallFollowCounter == 6) {
-    Serial.println("In wallfollow state 6");
-    setHeading(9);
+  if (wallFollowCounter == 6) {                    //state 6
+    Serial.println("In wallfollow state 6");       
+    setHeading(9);                                 //command boat to go straight
     if (IRarray[2] <= 100)
     {
 
