@@ -206,9 +206,11 @@ void loop() {
           wallfollow();
         }
       }
-      else if (command == "figure 8") {   //command to tell boat to exit dock and do a figure 8 around the icebergs 3 times
-        fig8();
-        realTimeRunStop = true;     //run loop continually
+      else if (command == "fig8") {   //command to tell boat to exit dock and do a figure 8 around the icebergs 3 times
+        if (loopCounter > 6)
+        {
+          fig8();
+        }
       }
       else if (command == "figure 8 dock") {   //similar to figure 8 coce but only does one figure 8 and then returns to the dock
         fig8Dock();
@@ -548,7 +550,7 @@ void wallfollow() {                                //wall following function
     if (fig8Counter == 0) {                          //if boat was just commanded to do fig8, counter would start in 0 and trigger the initial state
       Serial.println("In figure 8 state 0");         //indicate to rboticists which state the boat is in
       setHeading(9);                                 //boat drives out of the dock
-      if (loopCounter > 12) {                        //Wait 18 loops
+      if (loopCounter > 16) {                        //Wait 18 loops
         fig8Counter++;                               //trigger state 1
         loopCounter = 0;
       }
@@ -556,7 +558,7 @@ void wallfollow() {                                //wall following function
     if (fig8Counter == 1) {                          //if state 1 has been triggered
       Serial.println("In figure 8 state 1");         // turn left until counter stops
       setHeading (6);     //need to set side         //tells boat to turn to port side
-      if (loopCounter > 10) {                        //if/until the boat detects the wall infront of it within 100 cm then
+      if (loopCounter > 16) {                        //if/until the boat detects the wall infront of it within 100 cm then
         fig8Counter++;                               //trigger state 2
         loopCounter = 0;
       }
@@ -564,36 +566,41 @@ void wallfollow() {                                //wall following function
     if (fig8Counter == 2) {                          //if state 2 has been triggered
       Serial.println("In figure 8 state 2");         //Go straight until it sees the iceberg on the right
       setHeading(9);                                 //tell boat to drive straight
-      if ( IRarray[5] < 60) {                        //until it sees the iceberg on its starboard side
+      if ( IRarray[5] < 70) {                        //until it sees the iceberg on its starboard side
         fig8Counter++;                               //trigger state 3
+        loopCounter = 0;
       }
     }
     if (fig8Counter == 3) {                          //if state 3 has been triggered
       Serial.println("In figure 8 state 3");         // Maintain distance (60cm), go around the iceberg
-      maintainDistance(60, 1);  //need to set side  
-      if ( IRarray[0] == 120 && sonarArray[0] < 150) { //Until port IR doesnt see the wall and port sonar sees the other iceberg
+      setHeading(17);  //need to set side  
+      if ( IRarray[0] >= 120 && sonarArray[2] < 230 && sonarArray[1] < 230 && loopCounter >= 16) { //Until port IR doesnt see the wall and port sonar sees the other iceberg
         fig8Counter++;                               //trigger state 4
+        loopCounter = 0;
       }
     }
     if (fig8Counter == 4) {                          //if state 4 has been triggered
       Serial.println("In figure 8 state 4");         
       setHeading(9);                                  //Go straight until between the icebergs
-      if ( sonarArray[0] <= 160) {                   //if port IR sees the iceberg
+      if ( IRarray[0] < 70) {                   //if port IR sees the iceberg
         fig8Counter++;                               //trigger state 4
+        loopCounter = 0;
       }
     }
     if (fig8Counter == 5) {                          //if state 5 has been triggered
       Serial.println("In figure 8 state 5");        //indicate to roboticists which state the boat is in
-      maintainDistance(60,0);                       // Go around second iceberg, stay within 60 cm
-      if ( sonarArray[0] <= 100) {                  //if sonar detects something (iceberg) within 100 cm on the left side then
+      setHeading(2);                       // Go around second iceberg, stay within 60 cm
+      if ( IRarray[5] >= 120 && sonarArray[2] < 230 && sonarArray[1] < 230 && loopCounter >= 20) {                  //if sonar detects something (iceberg) within 100 cm on the left side then
         fig8Counter++;                             //trigger state 6
+        loopCounter = 0;
       }
     }
     if (fig8Counter == 6) {                          //if state 6 has been triggered
       Serial.println("In figure 8 state 6");         //indicate to roboticists which state the boat is in
-      circleIceberg(0);                              //command boat to circle iceberg on port side until
-      if ( sonarArray[4] <= 160) {                   //if sonar detects something (other iceberg) within 160 cm of the starboard side then
-        fig8Counter++;                               //trigger state 7
+      setHeading(9);                              //command boat to circle iceberg on port side until
+      if ( IRarray[5] < 70) {                   //if sonar detects something (other iceberg) within 160 cm of the starboard side then
+        fig8Counter = 3;                               //trigger state 7
+        loopCounter = 0;
       }
     }
     if (fig8Counter == 7) {                          //if state 7 has been triggered
@@ -601,6 +608,7 @@ void wallfollow() {                                //wall following function
       setHeading(11);                               //command boat to turn slightly to the right until
       if ( sonarArray[4] <= 100) {                  //if sonar detects something (iceberg) within 100 cm on the starboard side then
         fig8Counter++;                             //trigger state 8
+        loopCounter = 0;
       }
     }
     
@@ -847,15 +855,15 @@ void wallfollow() {                                //wall following function
         double alpha = (180 * atan((IRarray[4] * sin(PI / 8)) / (IRarray[5] - (IRarray[4] * cos(PI / 8))))) / PI;
         if (alpha < 0)
         {
-          convert = 90;
+          convert = 180 - alpha;
         } else {
-          convert = 180 - (alpha);
+          convert = 90;
         }
         convert = convert / 10;
       } else if ((IRarray[5] < 0.8 * dist) || (IRarray[4] < 0.8 * dist) || (IRarray[3] < 0.8 * dist)) {
-        convert = 14;
+        convert = 4;
       } else if (IRarray[5] > 1.2 * dist) {
-        convert = 8;
+        convert = 10;
       }
       setHeading(convert);
     }
