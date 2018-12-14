@@ -339,25 +339,22 @@ void findObjects()
     Serial.print(IRarray[i]);
     Serial.print("\t");
   }
-  Serial.print("\t");
-  Serial.print(sonarArray[2]);
-  Serial.println();
-  /*
-    Serial.print("Sonararray: ");
-    for (int i = 0; i < 6; i++)
-    {
+
+  Serial.print("Sonararray: ");
+  for (int i = 0; i < 6; i++)
+  {
     Serial.print(sonarArray[i]);
     Serial.print("\t");
-    }
-    Serial.println();
-
-    Serial.print("objectArray: ");
-    for (int i = 0; i < 19; i++)
-    {
+  }
+  Serial.println();
+  /*
+  Serial.print("objectArray: ");
+  for (int i = 0; i < 19; i++)
+  {
     Serial.print(objectArray[i]);
     Serial.print("\t");
-    }
-    Serial.println();
+  }
+  Serial.println();
   */
 }
 
@@ -480,53 +477,63 @@ void readSonar()
 //Behaviors
 //======================
 void wallfollow() {
-  Serial.println("In wallfollow");
+  //Serial.println("In wallfollow");
   if (wallFollowCounter == 0) {
     Serial.println("In wallfollow state 0");
     setHeading(9);
     if ( startupcounter > 18) {
       wallFollowCounter++;
+      startupcounter = 0;
     }
   }
   if (wallFollowCounter == 1) {
     Serial.println("In wallfollow state 1");
-    setHeading(2);     //need to set side
-    if (startupcounter > 34 ) {
+    setHeading(6);     //need to set side
+    if (startupcounter > 16 ) {
       wallFollowCounter++;
+      startupcounter = 0;
     }
   }
   if (wallFollowCounter == 2) {
     Serial.println("In wallfollow state 2");
     setHeading(9);
-    if (sonarArray [2] <= 100) {
+    if (sonarArray [1] <= 140) {
       wallFollowCounter ++;
+      startupcounter = 0;
     }
   }
   if (wallFollowCounter == 3) {
     Serial.println("In wallfollow state 3");
-    setHeading(16);
-    if (IRarray[2] <= 80) {
+    setHeading(13);
+    if (sonarArray[1] <= 90) {
       wallFollowCounter++;
+      startupcounter = 0;
     }
   }
   if (wallFollowCounter == 4) {
     Serial.println("In wallfollow state 4");
-    maintainDistanceProportional(70, 0);     //need to set side
-    if ( IRarray[2] <= 0 ) {
+    maintainDistanceProportional(80, 0);     //need to set side
+    if ((startupcounter >= 32) && (IRarray[4] <= 90)) {
       wallFollowCounter++;
+      startupcounter = 0;
     }
   }
   if (wallFollowCounter == 5) {
     Serial.println("In wallfollow state 5");
-    setspeed = 0;
-    //setHeading(13);
-    if ( IRarray[3] > 140) {
+    setHeading(12);
+    if (startupcounter >= 36) {
       wallFollowCounter++;
+      startupcounter = 0;
     }
   }
   if (wallFollowCounter == 6) {
     Serial.println("In wallfollow state 6");
     setHeading(9);
+    if (IRarray[2]<=100)
+    {
+      
+      //realTimeRunStop = false;
+    }
   }
   votingFunc();
   moveboat();
@@ -748,8 +755,8 @@ void maintainDistance(int dist, int side)   // distance in cm, side: 0 is left, 
 {
   if (side == 0) {
     int diff = (IRarray[1] - IRarray[2]);
-    int tempheading = map(diff, 40, -40, 11,7);
-      setHeading(tempheading);
+    int tempheading = map(diff, 40, -40, 11, 7);
+    setHeading(tempheading);
   }
   if (side == 1) {
     if (IRarray[18] < 0.8 * dist)
@@ -765,21 +772,21 @@ void maintainDistanceProportional(int dist, int side)   // distance in cm, side:
 {
   if (side == 0) {
     int convert;
-    if((IRarray[0]>0.8*dist)&&(IRarray[0]<1.2*dist))
+    if ((IRarray[0] > 0.8 * dist) && (IRarray[0] < 1.2 * dist))
     {
-      double alpha = (180*atan((IRarray[1]*sin(PI/8))/(IRarray[0]-(IRarray[1]*cos(PI/8)))))/PI;
+      double alpha = (180 * atan((IRarray[1] * sin(PI / 8)) / (IRarray[0] - (IRarray[1] * cos(PI / 8))))) / PI;
       if (alpha < 0)
       {
-        convert = -alpha;
-      }else{
-        convert = 180 - alpha;
+        convert = 90;
+      } else {
+        convert = 180 - (alpha);
       }
-      convert = convert/10;
-    }else if(IRarray[0]<0.8*dist){
-      convert = 12; 
-    }else if(IRarray[0]>1.2*dist){
+      convert = convert / 10;
+    } else if ((IRarray[0] < 0.8 * dist)||(IRarray[1] < 0.8 * dist)||(IRarray[2] < 0.8 * dist)) {
+      convert = 14;
+    } else if (IRarray[0] > 1.2 * dist) {
       convert = 8;
-    }
+    } 
     setHeading(convert);
   }
   if (side == 1) {
@@ -790,7 +797,7 @@ void maintainDistanceProportional(int dist, int side)   // distance in cm, side:
       setHeading(6);
     }
   }
-  
+
 }
 
 void circleIceberg(int side)
@@ -819,10 +826,14 @@ void circleIceberg(int side)
 void votingFunc()
 {
   int voteArray[19];
+  Serial.print("Vote Array: ");
   for (int entry = 0; entry < 19; entry++)
   {
     voteArray[entry] = targetArray[entry] + objectArray[entry];
+    Serial.print(voteArray[entry]);
+    Serial.print("\t");
   }
+  Serial.println();
   int maximum = 0;
   int maximumIndex = voteArray[0];
   for (int i = 0; i < 19; i++)
