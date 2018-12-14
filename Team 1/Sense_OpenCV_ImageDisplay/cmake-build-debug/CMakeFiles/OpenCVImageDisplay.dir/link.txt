@@ -1,1 +1,0 @@
-/usr/bin/c++  -g   CMakeFiles/OpenCVImageDisplay.dir/main.cpp.o  -o OpenCVImageDisplay 
