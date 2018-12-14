@@ -5,7 +5,7 @@
 //SharpIR IR2(SharpIR::GP2Y0A02YK0F, A9);
 //SharpIR IR3(SharpIR::GP2Y0A02YK0F, A10);
 //SharpIR IR4(SharpIR::GP2Y0A02YK0F, A11);
-//SharpIR IR5(SharpIR::GP2Y0A02YK0F, A12);
+//SharpIR IR5(SharpIR::GP2Y0A02YK0F, A12);Before
 //SharpIR IR6(SharpIR::GP2Y0A02YK0F, A13);
 
 int IRarray[6] = {};
@@ -28,7 +28,6 @@ void loop() {
   readIR();
   readSonar();
       Serial.println("IRData: ");
-    Serial.println(sizeof(IRarray));
       for (int i = 0; i < 6 ; i++) {
         Serial.print(IRarray[i]);
         Serial.print(", ");
