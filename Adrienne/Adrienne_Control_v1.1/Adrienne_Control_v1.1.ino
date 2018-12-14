@@ -476,6 +476,9 @@ void readSonar()
 //======================
 //Behaviors
 //======================
+
+//Figure 8
+//----------------------
 void fig8() {
   Serial.println("In figure 8"); // leaving dock
   if (fig8Counter == 0) {
@@ -557,6 +560,10 @@ void fig8() {
   realTimeRunStop = true;     //run loop continually
 }
 
+
+
+//Wallfollow
+//----------------------
 void wallfollow() {
   Serial.println("In wallfollow");
   if (wallFollowCounter == 0) {
@@ -609,6 +616,10 @@ void wallfollow() {
   moveboat();
 }
 
+
+
+//Figure 8 and dock
+//----------------------
 void fig8Dock() {
   Serial.println("In figure 8"); // leaving dock
   if (fig8DockCounter == 0) {
@@ -696,6 +707,10 @@ void fig8Dock() {
   moveboat();
 }
 
+
+
+//Hunting 
+//----------------------
 void hunt() {
   if (huntCounter == 0) {
     setHeading(9);
